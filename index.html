@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECHO Protocol :: Access Terminal</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="scanlines"></div>
+    <div class="noise"></div>
+    
+    <div class="terminal-container">
+        <div class="terminal-header">
+            <div class="terminal-controls">
+                <span class="control-dot red"></span>
+                <span class="control-dot yellow"></span>
+                <span class="control-dot green"></span>
+            </div>
+            <div class="terminal-title">ECHO_PROTOCOL_v2.3.7</div>
+            <div class="terminal-status" id="connection-status">
+                <span class="status-indicator"></span>
+                <span class="status-text">STANDBY</span>
+            </div>
+        </div>
+        
+        <div class="terminal-body">
+            <div class="glitch-wrapper">
+                <h1 class="glitch" data-text="ECHO PROTOCOL">ECHO PROTOCOL</h1>
+            </div>
+            
+            <div class="subtitle">
+                <span class="bracket">[</span>
+                <span class="typing-text" id="subtitle"></span>
+                <span class="cursor">_</span>
+                <span class="bracket">]</span>
+            </div>
+
+            <!-- Welcome Screen -->
+            <div id="welcome-screen" class="screen active">
+                <div class="console-output">
+                    <p class="console-line">> Initializing secure connection...</p>
+                    <p class="console-line delay-1">> Encryption protocol: AES-256</p>
+                    <p class="console-line delay-2">> Authentication required</p>
+                    <p class="console-line delay-3 highlight">> Select access mode:</p>
+                </div>
+                
+                <div class="button-group">
+                    <button class="terminal-button" onclick="showLogin()">
+                        <span class="button-icon">→</span> LOGIN
+                    </button>
+                    <button class="terminal-button secondary" onclick="showRegister()">
+                        <span class="button-icon">+</span> CREATE NEW IDENTITY
+                    </button>
+                </div>
+            </div>
+
+            <!-- Login Screen -->
+            <div id="login-screen" class="screen">
+                <div class="console-output">
+                    <p class="console-line">> Identity verification required</p>
+                    <p class="console-line delay-1">> Enter credentials</p>
+                </div>
+                
+                <form id="login-form" class="terminal-form">
+                    <div class="form-group">
+                        <label for="login-username">
+                            <span class="label-icon">&gt;</span> USERNAME / EMAIL
+                        </label>
+                        <input type="text" id="login-username" class="terminal-input" autocomplete="username" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="login-password">
+                            <span class="label-icon">&gt;</span> PASSWORD
+                        </label>
+                        <input type="password" id="login-password" class="terminal-input" autocomplete="current-password" required>
+                    </div>
+                    
+                    <div id="login-error" class="error-message"></div>
+                    
+                    <div class="button-group">
+                        <button type="submit" class="terminal-button">
+                            <span class="button-icon">→</span> AUTHENTICATE
+                        </button>
+                        <button type="button" class="terminal-button secondary" onclick="showWelcome()">
+                            <span class="button-icon">←</span> BACK
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Register Screen -->
+            <div id="register-screen" class="screen">
+                <div class="console-output">
+                    <p class="console-line">> New identity creation protocol</p>
+                    <p class="console-line delay-1">> All data will be encrypted</p>
+                    <p class="console-line delay-2 warning">> WARNING: Choose credentials wisely</p>
+                </div>
+                
+                <form id="register-form" class="terminal-form">
+                    <div class="form-group">
+                        <label for="register-username">
+                            <span class="label-icon">&gt;</span> USERNAME
+                            <span class="label-hint">(3-20 chars, alphanumeric)</span>
+                        </label>
+                        <input type="text" id="register-username" class="terminal-input" autocomplete="username" required pattern="[a-zA-Z0-9_]{3,20}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="register-email">
+                            <span class="label-icon">&gt;</span> EMAIL
+                        </label>
+                        <input type="email" id="register-email" class="terminal-input" autocomplete="email" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="register-password">
+                            <span class="label-icon">&gt;</span> PASSWORD
+                            <span class="label-hint">(min 8 chars, mixed case + numbers)</span>
+                        </label>
+                        <input type="password" id="register-password" class="terminal-input" autocomplete="new-password" required>
+                        <div class="password-strength">
+                            <div class="strength-bar" id="strength-bar"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="register-confirm">
+                            <span class="label-icon">&gt;</span> CONFIRM PASSWORD
+                        </label>
+                        <input type="password" id="register-confirm" class="terminal-input" autocomplete="new-password" required>
+                    </div>
+                    
+                    <div id="register-error" class="error-message"></div>
+                    
+                    <div class="button-group">
+                        <button type="submit" class="terminal-button">
+                            <span class="button-icon">+</span> CREATE IDENTITY
+                        </button>
+                        <button type="button" class="terminal-button secondary" onclick="showWelcome()">
+                            <span class="button-icon">←</span> BACK
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Dashboard Screen -->
+            <div id="dashboard-screen" class="screen">
+                <div class="console-output">
+                    <p class="console-line">> Access granted</p>
+                    <p class="console-line delay-1">> Welcome back, <span id="user-name" class="highlight"></span></p>
+                </div>
+                
+                <div class="dashboard-content">
+                    <div class="stats-grid">
+                        <div class="stat-box">
+                            <div class="stat-label">IDENTITY</div>
+                            <div class="stat-value" id="dash-username">---</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">LEVEL</div>
+                            <div class="stat-value" id="dash-level">1</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">STATUS</div>
+                            <div class="stat-value status-active">ACTIVE</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">JOINED</div>
+                            <div class="stat-value" id="dash-joined">---</div>
+                        </div>
+                    </div>
+                    
+                    <div class="progress-section">
+                        <h3>CURRENT MISSIONS</h3>
+                        <div class="mission-list" id="mission-list">
+                            <p class="console-line">No active missions. Check back later...</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="button-group">
+                    <button class="terminal-button" onclick="startMission()">
+                        <span class="button-icon">▶</span> BEGIN PROTOCOL
+                    </button>
+                    <button class="terminal-button secondary" onclick="logout()">
+                        <span class="button-icon">×</span> DISCONNECT
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="terminal-footer">
+            <div class="footer-info">
+                <span id="system-time"></span>
+            </div>
+            <div class="footer-info">
+                ECHO_SYS :: v2.3.7 :: SECURE
+            </div>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
