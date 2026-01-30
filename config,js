@@ -1,24 +1,8 @@
 // API Configuration
-// デプロイ時にはこのURLをRenderのバックエンドURLに変更してください
 const API_CONFIG = {
-    // ローカル開発用
-    // BASE_URL: 'http://localhost:3000',
-    
     // Renderデプロイ用（実際のURLに置き換えてください）
     BASE_URL: 'https://teamgensourei-ggak.onrender.com',
     
-    // エンドポイント
-    ENDPOINTS: {
-        REGISTER: '/api/register',
-        LOGIN: '/api/login',
-        PROFILE: '/api/profile',
-        LOGOUT: '/api/logout',
-        PROGRESS: '/api/progress'
-    }
-};
-
-// ローカルストレージのキー
-const STORAGE_KEYS = {
-    TOKEN: 'arg_auth_token',
-    USER: 'arg_user_data'
+    // ローカル開発用（コメントアウトを解除して使用）
+    // BASE_URL: 'http://localhost:3000',
 };
