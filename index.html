@@ -3,18 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>第四境界 :: ECHO PROTOCOL</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>ECHO PROTOCOL - Scratch Authentication</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=IBM+Plex+Mono:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="scanlines"></div>
     <div class="noise"></div>
     
-    <!-- Login Screen Container -->
-    <div id="login-container" class="terminal-container">
+    <div class="terminal-container">
         <div class="terminal-header">
             <div class="terminal-controls">
                 <span class="control-dot red"></span>
@@ -22,7 +21,7 @@
                 <span class="control-dot green"></span>
             </div>
             <div class="terminal-title">ECHO_PROTOCOL_v2.3.7</div>
-            <div class="terminal-status" id="connection-status">
+            <div class="terminal-status">
                 <span class="status-indicator"></span>
                 <span class="status-text">STANDBY</span>
             </div>
@@ -43,7 +42,7 @@
             <!-- Welcome Screen -->
             <div id="welcome-screen" class="screen active">
                 <div class="console-output">
-                    <p class="console-line">> Initializing secure connection...</p>
+                    <p class="console-line">> Initializing Scratch verification...</p>
                     <p class="console-line delay-1">> Encryption protocol: AES-256</p>
                     <p class="console-line delay-2">> Authentication required</p>
                     <p class="console-line delay-3 highlight">> Select access mode:</p>
@@ -62,126 +61,111 @@
             <!-- Login Screen -->
             <div id="login-screen" class="screen">
                 <div class="console-output">
-                    <p class="console-line">> Identity verification required</p>
+                    <p class="console-line">> Scratch identity verification</p>
                     <p class="console-line delay-1">> Enter credentials</p>
                 </div>
                 
-                <!-- Auth Tabs -->
-                <div class="auth-tabs">
-                    <button class="auth-tab active" onclick="showAuthTab('password')">
-                        <span class="tab-icon">🔑</span> PASSWORD
-                    </button>
-                    <button class="auth-tab" onclick="showAuthTab('magic')">
-                        <span class="tab-icon">✉</span> MAGIC LINK
-                    </button>
-                </div>
-
-                <!-- Password Login -->
-                <div id="password-tab" class="auth-content active">
-                    <form id="login-form" class="terminal-form">
-                        <div class="form-group">
-                            <label for="login-username">
-                                <span class="label-icon">&gt;</span> USERNAME / EMAIL
-                            </label>
-                            <input type="text" id="login-username" class="terminal-input" autocomplete="username" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="login-password">
-                                <span class="label-icon">&gt;</span> PASSWORD
-                            </label>
-                            <input type="password" id="login-password" class="terminal-input" autocomplete="current-password" required>
-                        </div>
-                        
-                        <div id="login-error" class="error-message"></div>
-                        
-                        <div class="button-group">
-                            <button type="submit" class="terminal-button">
-                                <span class="button-icon">→</span> AUTHENTICATE
-                            </button>
-                            <button type="button" class="terminal-button secondary" onclick="showWelcome()">
-                                <span class="button-icon">←</span> BACK
-                            </button>
-                        </div>
-                    </form>
-                </div>
-
-                <!-- Magic Link Login -->
-                <div id="magic-tab" class="auth-content">
-                    <p class="info-text">メールアドレスを入力してください。ログインリンクを送信します。</p>
-                    <form id="magic-link-form" class="terminal-form">
-                        <div class="form-group">
-                            <label for="magic-email">
-                                <span class="label-icon">&gt;</span> EMAIL
-                            </label>
-                            <input type="email" id="magic-email" class="terminal-input" autocomplete="email" required>
-                        </div>
-                        
-                        <div id="magic-error" class="error-message"></div>
-                        <div id="magic-success" class="success-message"></div>
-                        
-                        <div class="button-group">
-                            <button type="submit" class="terminal-button">
-                                <span class="button-icon">✉</span> SEND MAGIC LINK
-                            </button>
-                            <button type="button" class="terminal-button secondary" onclick="showWelcome()">
-                                <span class="button-icon">←</span> BACK
-                            </button>
-                        </div>
-                    </form>
-                </div>
+                <form id="login-form" class="terminal-form">
+                    <div class="form-group">
+                        <label for="login-scratch">
+                            <span class="label-icon">&gt;</span> SCRATCH USERNAME
+                        </label>
+                        <input type="text" id="login-scratch" class="terminal-input" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="login-password">
+                            <span class="label-icon">&gt;</span> PASSWORD
+                        </label>
+                        <input type="password" id="login-password" class="terminal-input" required>
+                    </div>
+                    
+                    <div id="login-error" class="error-message"></div>
+                    
+                    <div class="button-group">
+                        <button type="submit" class="terminal-button">
+                            <span class="button-icon">→</span> AUTHENTICATE
+                        </button>
+                        <button type="button" class="terminal-button secondary" onclick="showWelcome()">
+                            <span class="button-icon">←</span> BACK
+                        </button>
+                    </div>
+                </form>
             </div>
 
-            <!-- Register Screen -->
+            <!-- Register Screen - Step 1 -->
             <div id="register-screen" class="screen">
                 <div class="console-output">
                     <p class="console-line">> New identity creation protocol</p>
-                    <p class="console-line delay-1">> All data will be encrypted</p>
-                    <p class="console-line delay-2 warning">> WARNING: Choose credentials wisely</p>
+                    <p class="console-line delay-1">> Verifying Scratch account</p>
+                    <p class="console-line delay-2 warning">> WARNING: Scratch account must exist</p>
                 </div>
                 
-                <form id="register-form" class="terminal-form">
+                <form id="verify-form" class="terminal-form">
                     <div class="form-group">
-                        <label for="register-username">
-                            <span class="label-icon">&gt;</span> USERNAME
-                            <span class="label-hint">(3-20 chars, alphanumeric)</span>
+                        <label for="verify-scratch">
+                            <span class="label-icon">&gt;</span> SCRATCH USERNAME
+                            <span class="label-hint">(must be valid Scratch account)</span>
                         </label>
-                        <input type="text" id="register-username" class="terminal-input" autocomplete="username" required pattern="[a-zA-Z0-9_]{3,20}">
+                        <input type="text" id="verify-scratch" class="terminal-input" required>
                     </div>
                     
                     <div class="form-group">
-                        <label for="register-email">
+                        <label for="verify-email">
                             <span class="label-icon">&gt;</span> EMAIL
+                            <span class="label-hint">(for account recovery)</span>
                         </label>
-                        <input type="email" id="register-email" class="terminal-input" autocomplete="email" required>
+                        <input type="email" id="verify-email" class="terminal-input" required>
                     </div>
                     
+                    <div id="verify-error" class="error-message"></div>
+                    <div id="verify-success" class="success-message"></div>
+                    
+                    <div class="button-group">
+                        <button type="submit" class="terminal-button">
+                            <span class="button-icon">✓</span> VERIFY SCRATCH ACCOUNT
+                        </button>
+                        <button type="button" class="terminal-button secondary" onclick="showWelcome()">
+                            <span class="button-icon">←</span> BACK
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Register Screen - Step 2 -->
+            <div id="password-screen" class="screen">
+                <div class="console-output">
+                    <p class="console-line success">> Scratch account verified</p>
+                    <p class="console-line delay-1">> User: <span id="verified-username"></span></p>
+                    <p class="console-line delay-2 highlight">> Set your password</p>
+                </div>
+                
+                <form id="password-form" class="terminal-form">
                     <div class="form-group">
-                        <label for="register-password">
+                        <label for="set-password">
                             <span class="label-icon">&gt;</span> PASSWORD
                             <span class="label-hint">(min 8 chars, mixed case + numbers)</span>
                         </label>
-                        <input type="password" id="register-password" class="terminal-input" autocomplete="new-password" required>
+                        <input type="password" id="set-password" class="terminal-input" required>
                         <div class="password-strength">
                             <div class="strength-bar" id="strength-bar"></div>
                         </div>
                     </div>
                     
                     <div class="form-group">
-                        <label for="register-confirm">
+                        <label for="confirm-password">
                             <span class="label-icon">&gt;</span> CONFIRM PASSWORD
                         </label>
-                        <input type="password" id="register-confirm" class="terminal-input" autocomplete="new-password" required>
+                        <input type="password" id="confirm-password" class="terminal-input" required>
                     </div>
                     
-                    <div id="register-error" class="error-message"></div>
-                    <div id="register-success" class="success-message"></div>
+                    <div id="password-error" class="error-message"></div>
                     
                     <div class="button-group">
                         <button type="submit" class="terminal-button">
                             <span class="button-icon">+</span> CREATE IDENTITY
                         </button>
-                        <button type="button" class="terminal-button secondary" onclick="showWelcome()">
+                        <button type="button" class="terminal-button secondary" onclick="showRegister()">
                             <span class="button-icon">←</span> BACK
                         </button>
                     </div>
@@ -194,169 +178,7 @@
                 <span id="system-time"></span>
             </div>
             <div class="footer-info">
-                ECHO_SYS :: v2.3.7 :: SECURE
-            </div>
-        </div>
-    </div>
-
-    <!-- Dashboard Screen (第四境界) -->
-    <div id="main-console" class="main-console">
-        <!-- Header -->
-        <div class="console-header">
-            <div class="header-left">
-                <span class="header-title">第四境界 CONSOLE</span>
-                <span class="header-version">v4.0.7-beta</span>
-            </div>
-            <div class="header-right">
-                <span class="connection-status" id="dash-connection-status">
-                    <span class="status-dot"></span>
-                    <span class="status-text">CONNECTED</span>
-                </span>
-                <span class="system-time" id="dash-system-time"></span>
-            </div>
-        </div>
-
-        <div class="dashboard-layout">
-            <!-- Sidebar -->
-            <div class="sidebar">
-                <div class="user-card">
-                    <div class="user-avatar" id="user-avatar">?</div>
-                    <div class="user-info">
-                        <div class="user-name" id="user-name">UNKNOWN</div>
-                        <div class="user-status">LEVEL <span id="user-level">0</span></div>
-                    </div>
-                </div>
-
-                <nav class="nav-menu">
-                    <a class="nav-item active" onclick="showDashboardView('console')">
-                        <span class="nav-icon">▶</span> CONSOLE
-                    </a>
-                    <a class="nav-item" onclick="showDashboardView('missions')">
-                        <span class="nav-icon">◆</span> MISSIONS
-                    </a>
-                    <a class="nav-item" onclick="showDashboardView('data')">
-                        <span class="nav-icon">◉</span> DATA LOGS
-                    </a>
-                    <a class="nav-item" onclick="showDashboardView('settings')">
-                        <span class="nav-icon">⚙</span> SETTINGS
-                    </a>
-                    <a class="nav-item logout" onclick="logout()">
-                        <span class="nav-icon">×</span> DISCONNECT
-                    </a>
-                </nav>
-            </div>
-
-            <!-- Main Content -->
-            <div class="main-content">
-                <!-- Console View -->
-                <div id="console-view" class="view active">
-                    <div class="console-window large">
-                        <div class="window-titlebar">
-                            <span>boundary_console.exe</span>
-                            <div class="window-controls">
-                                <span>_</span>
-                                <span>□</span>
-                                <span>×</span>
-                            </div>
-                        </div>
-                        <div class="window-content">
-                            <div class="terminal-display" id="console-display">
-                                <p class="console-line">&gt; 第四境界コンソール - アクセス許可済み</p>
-                                <p class="console-line dim">&gt; FOURTH BOUNDARY CONSOLE - ACCESS GRANTED</p>
-                                <p class="console-line">&gt; </p>
-                                <p class="console-line success">&gt; システム初期化完了</p>
-                                <p class="console-line">&gt; ユーザー: <span id="console-username">LOADING...</span></p>
-                                <p class="console-line">&gt; セキュリティレベル: MAXIMUM</p>
-                                <p class="console-line">&gt; </p>
-                                <p class="console-line highlight">&gt; コマンドを入力してください...</p>
-                            </div>
-                            <div class="terminal-input-area">
-                                <span class="terminal-prompt">&gt;</span>
-                                <input type="text" id="console-input" class="terminal-input" placeholder="コマンドを入力..." autocomplete="off">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="info-panels">
-                        <div class="info-panel">
-                            <div class="panel-header">SYSTEM STATUS</div>
-                            <div class="panel-content">
-                                <div class="stat-row">
-                                    <span>CONNECTION:</span>
-                                    <span class="stat-value success">SECURE</span>
-                                </div>
-                                <div class="stat-row">
-                                    <span>ENCRYPTION:</span>
-                                    <span class="stat-value">AES-256</span>
-                                </div>
-                                <div class="stat-row">
-                                    <span>UPTIME:</span>
-                                    <span class="stat-value" id="uptime">00:00:00</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="info-panel">
-                            <div class="panel-header">QUICK ACTIONS</div>
-                            <div class="panel-content">
-                                <button class="panel-button" onclick="executeCommand('help')">
-                                    <span>?</span> HELP
-                                </button>
-                                <button class="panel-button" onclick="executeCommand('status')">
-                                    <span>◉</span> STATUS
-                                </button>
-                                <button class="panel-button" onclick="executeCommand('clear')">
-                                    <span>◇</span> CLEAR
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Missions View -->
-                <div id="missions-view" class="view">
-                    <h2 class="view-title">ACTIVE MISSIONS</h2>
-                    <div class="mission-list">
-                        <div class="mission-card">
-                            <div class="mission-header">
-                                <span class="mission-id">#001</span>
-                                <span class="mission-status pending">PENDING</span>
-                            </div>
-                            <div class="mission-title">第一の謎: 暗号解読</div>
-                            <div class="mission-desc">境界に隠された暗号を解読せよ</div>
-                            <div class="mission-progress">
-                                <div class="progress-bar-container">
-                                    <div class="progress-fill" style="width: 0%"></div>
-                                </div>
-                                <span class="progress-text">0%</span>
-                            </div>
-                        </div>
-                        <div class="mission-card locked">
-                            <div class="mission-header">
-                                <span class="mission-id">#002</span>
-                                <span class="mission-status locked">LOCKED</span>
-                            </div>
-                            <div class="mission-title">??? CLASSIFIED ???</div>
-                            <div class="mission-desc">前のミッションをクリアしてください</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Data View -->
-                <div id="data-view" class="view">
-                    <h2 class="view-title">DATA LOGS</h2>
-                    <div class="data-logs">
-                        <p class="log-entry">&gt; アクセスログ記録中...</p>
-                    </div>
-                </div>
-
-                <!-- Settings View -->
-                <div id="settings-view" class="view">
-                    <h2 class="view-title">SETTINGS</h2>
-                    <div class="settings-panel">
-                        <p class="info-text">設定機能は開発中です</p>
-                    </div>
-                </div>
+                ECHO_SYS :: v2.3.7 :: SCRATCH_AUTH
             </div>
         </div>
     </div>
