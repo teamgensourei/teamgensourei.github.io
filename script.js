@@ -1,18 +1,17 @@
-// Scratch認証対応版
-let verifiedScratch = null;
-let verifiedEmail = null;
+// メール認証対応版
+let pendingEmail = null;
+let pendingScratchUsername = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     checkIfLoggedIn();
     setupEventListeners();
     startSystemTime();
-    typeSubtitle('SCRATCH VERIFICATION SYSTEM');
+    typeSubtitle('EMAIL VERIFICATION SYSTEM');
 });
 
 function checkIfLoggedIn() {
     const token = localStorage.getItem('boundary_token');
     if (token) {
-        // Already logged in, redirect to console
         window.location.href = 'console.html';
     }
 }
@@ -24,16 +23,16 @@ function setupEventListeners() {
         loginForm.addEventListener('submit', handleLogin);
     }
     
-    // Verify Form (Step 1)
-    const verifyForm = document.getElementById('verify-form');
-    if (verifyForm) {
-        verifyForm.addEventListener('submit', handleVerify);
+    // Register Form - Step 1 (Email送信)
+    const registerForm = document.getElementById('register-form');
+    if (registerForm) {
+        registerForm.addEventListener('submit', handleSendCode);
     }
     
-    // Password Form (Step 2)
-    const passwordForm = document.getElementById('password-form');
-    if (passwordForm) {
-        passwordForm.addEventListener('submit', handleCompleteRegistration);
+    // Verification Form - Step 2 (コード確認)
+    const verifyForm = document.getElementById('verify-form');
+    if (verifyForm) {
+        verifyForm.addEventListener('submit', handleVerifyCode);
     }
     
     // Password Strength
@@ -59,16 +58,16 @@ function showRegister() {
     document.getElementById('register-screen').classList.add('active');
 }
 
-function showPasswordScreen() {
+function showVerifyCodeScreen() {
     hideAllScreens();
-    document.getElementById('password-screen').classList.add('active');
+    document.getElementById('verify-code-screen').classList.add('active');
 }
 
 function hideAllScreens() {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
 }
 
-// Handle Login
+// Login
 async function handleLogin(e) {
     e.preventDefault();
     
@@ -100,14 +99,14 @@ async function handleLogin(e) {
     }
 }
 
-// Handle Scratch Verification (Step 1)
-async function handleVerify(e) {
+// Step 1: 認証コードをメールに送信
+async function handleSendCode(e) {
     e.preventDefault();
     
-    const scratchUsername = document.getElementById('verify-scratch').value.trim();
-    const email = document.getElementById('verify-email').value.trim();
-    const errorDiv = document.getElementById('verify-error');
-    const successDiv = document.getElementById('verify-success');
+    const scratchUsername = document.getElementById('register-scratch').value.trim();
+    const email = document.getElementById('register-email').value.trim();
+    const errorDiv = document.getElementById('register-error');
+    const successDiv = document.getElementById('register-success');
     
     errorDiv.classList.remove('show');
     successDiv.classList.remove('show');
@@ -118,7 +117,7 @@ async function handleVerify(e) {
     }
     
     try {
-        const response = await fetch(`${API_CONFIG.BASE_URL}/api/verify-scratch`, {
+        const response = await fetch(`${API_CONFIG.BASE_URL}/api/register/send-code`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ scratchUsername, email })
@@ -127,33 +126,39 @@ async function handleVerify(e) {
         const data = await response.json();
         
         if (response.ok) {
-            verifiedScratch = data.scratchUser.username;
-            verifiedEmail = email;
+            pendingEmail = email;
+            pendingScratchUsername = scratchUsername;
             
-            showSuccess(successDiv, 'Scratchアカウントを確認しました！');
+            showSuccess(successDiv, '認証コードをメールに送信しました！');
             
             setTimeout(() => {
-                document.getElementById('verified-username').textContent = verifiedScratch;
-                showPasswordScreen();
+                document.getElementById('verify-email-display').textContent = email;
+                showVerifyCodeScreen();
             }, 1000);
         } else {
-            showError(errorDiv, data.error || 'Scratch認証に失敗しました');
+            showError(errorDiv, data.error || '送信に失敗しました');
         }
     } catch (error) {
-        console.error('Verification error:', error);
+        console.error('Send code error:', error);
         showError(errorDiv, 'サーバーに接続できませんでした');
     }
 }
 
-// Handle Complete Registration (Step 2)
-async function handleCompleteRegistration(e) {
+// Step 2: 認証コード確認とアカウント作成
+async function handleVerifyCode(e) {
     e.preventDefault();
     
+    const code = document.getElementById('verify-code').value.trim();
     const password = document.getElementById('set-password').value;
     const confirm = document.getElementById('confirm-password').value;
-    const errorDiv = document.getElementById('password-error');
+    const errorDiv = document.getElementById('verify-error');
     
     errorDiv.classList.remove('show');
+    
+    if (!code || !password || !confirm) {
+        showError(errorDiv, 'すべてのフィールドを入力してください');
+        return;
+    }
     
     if (password !== confirm) {
         showError(errorDiv, 'パスワードが一致しません');
@@ -165,18 +170,18 @@ async function handleCompleteRegistration(e) {
         return;
     }
     
-    if (!verifiedScratch || !verifiedEmail) {
+    if (!pendingEmail) {
         showError(errorDiv, 'セッションエラー。最初からやり直してください。');
         return;
     }
     
     try {
-        const response = await fetch(`${API_CONFIG.BASE_URL}/api/complete-registration`, {
+        const response = await fetch(`${API_CONFIG.BASE_URL}/api/register/verify-code`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
-                scratchUsername: verifiedScratch,
-                email: verifiedEmail,
+                email: pendingEmail,
+                code,
                 password 
             })
         });
@@ -193,7 +198,7 @@ async function handleCompleteRegistration(e) {
             showError(errorDiv, data.error || 'アカウント作成に失敗しました');
         }
     } catch (error) {
-        console.error('Registration error:', error);
+        console.error('Verify code error:', error);
         showError(errorDiv, 'サーバーに接続できませんでした');
     }
 }
