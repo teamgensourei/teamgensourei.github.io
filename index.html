@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ECHO PROTOCOL - Scratch Authentication</title>
+    <title>ECHO PROTOCOL - Email Authentication</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
@@ -20,7 +20,7 @@
                 <span class="control-dot yellow"></span>
                 <span class="control-dot green"></span>
             </div>
-            <div class="terminal-title">ECHO_PROTOCOL_v2.3.7</div>
+            <div class="terminal-title">ECHO_PROTOCOL_v2.4.0</div>
             <div class="terminal-status">
                 <span class="status-indicator"></span>
                 <span class="status-text">STANDBY</span>
@@ -42,7 +42,7 @@
             <!-- Welcome Screen -->
             <div id="welcome-screen" class="screen active">
                 <div class="console-output">
-                    <p class="console-line">> Initializing Scratch verification...</p>
+                    <p class="console-line">> Initializing email verification...</p>
                     <p class="console-line delay-1">> Encryption protocol: AES-256</p>
                     <p class="console-line delay-2">> Authentication required</p>
                     <p class="console-line delay-3 highlight">> Select access mode:</p>
@@ -93,37 +93,37 @@
                 </form>
             </div>
 
-            <!-- Register Screen - Step 1 -->
+            <!-- Register Screen - Step 1: Send Verification Code -->
             <div id="register-screen" class="screen">
                 <div class="console-output">
                     <p class="console-line">> New identity creation protocol</p>
-                    <p class="console-line delay-1">> Verifying Scratch account</p>
+                    <p class="console-line delay-1">> Email verification required</p>
                     <p class="console-line delay-2 warning">> WARNING: Scratch account must exist</p>
                 </div>
                 
-                <form id="verify-form" class="terminal-form">
+                <form id="register-form" class="terminal-form">
                     <div class="form-group">
-                        <label for="verify-scratch">
+                        <label for="register-scratch">
                             <span class="label-icon">&gt;</span> SCRATCH USERNAME
                             <span class="label-hint">(must be valid Scratch account)</span>
                         </label>
-                        <input type="text" id="verify-scratch" class="terminal-input" required>
+                        <input type="text" id="register-scratch" class="terminal-input" required>
                     </div>
                     
                     <div class="form-group">
-                        <label for="verify-email">
+                        <label for="register-email">
                             <span class="label-icon">&gt;</span> EMAIL
-                            <span class="label-hint">(for account recovery)</span>
+                            <span class="label-hint">(verification code will be sent)</span>
                         </label>
-                        <input type="email" id="verify-email" class="terminal-input" required>
+                        <input type="email" id="register-email" class="terminal-input" required>
                     </div>
                     
-                    <div id="verify-error" class="error-message"></div>
-                    <div id="verify-success" class="success-message"></div>
+                    <div id="register-error" class="error-message"></div>
+                    <div id="register-success" class="success-message"></div>
                     
                     <div class="button-group">
                         <button type="submit" class="terminal-button">
-                            <span class="button-icon">✓</span> VERIFY SCRATCH ACCOUNT
+                            <span class="button-icon">📧</span> SEND VERIFICATION CODE
                         </button>
                         <button type="button" class="terminal-button secondary" onclick="showWelcome()">
                             <span class="button-icon">←</span> BACK
@@ -132,15 +132,24 @@
                 </form>
             </div>
 
-            <!-- Register Screen - Step 2 -->
-            <div id="password-screen" class="screen">
+            <!-- Register Screen - Step 2: Verify Code & Set Password -->
+            <div id="verify-code-screen" class="screen">
                 <div class="console-output">
-                    <p class="console-line success">> Scratch account verified</p>
-                    <p class="console-line delay-1">> User: <span id="verified-username"></span></p>
-                    <p class="console-line delay-2 highlight">> Set your password</p>
+                    <p class="console-line success">> Verification code sent</p>
+                    <p class="console-line delay-1">> Email: <span id="verify-email-display"></span></p>
+                    <p class="console-line delay-2 highlight">> Enter code and set password</p>
                 </div>
                 
-                <form id="password-form" class="terminal-form">
+                <form id="verify-form" class="terminal-form">
+                    <div class="form-group">
+                        <label for="verify-code">
+                            <span class="label-icon">&gt;</span> VERIFICATION CODE
+                            <span class="label-hint">(6-digit code from email)</span>
+                        </label>
+                        <input type="text" id="verify-code" class="terminal-input" 
+                               maxlength="6" pattern="[0-9]{6}" placeholder="123456" required>
+                    </div>
+                    
                     <div class="form-group">
                         <label for="set-password">
                             <span class="label-icon">&gt;</span> PASSWORD
@@ -159,11 +168,11 @@
                         <input type="password" id="confirm-password" class="terminal-input" required>
                     </div>
                     
-                    <div id="password-error" class="error-message"></div>
+                    <div id="verify-error" class="error-message"></div>
                     
                     <div class="button-group">
                         <button type="submit" class="terminal-button">
-                            <span class="button-icon">+</span> CREATE IDENTITY
+                            <span class="button-icon">✓</span> CREATE IDENTITY
                         </button>
                         <button type="button" class="terminal-button secondary" onclick="showRegister()">
                             <span class="button-icon">←</span> BACK
@@ -178,7 +187,7 @@
                 <span id="system-time"></span>
             </div>
             <div class="footer-info">
-                ECHO_SYS :: v2.3.7 :: SCRATCH_AUTH
+                ECHO_SYS :: v2.4.0 :: EMAIL_AUTH
             </div>
         </div>
     </div>
