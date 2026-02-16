@@ -42,9 +42,9 @@
             <!-- Welcome Screen -->
             <div id="welcome-screen" class="screen active">
                 <div class="console-output">
-                    <p class="console-line">> Initializing email verification...</p>
-                    <p class="console-line delay-1">> Encryption protocol: AES-256</p>
-                    <p class="console-line delay-2">> Authentication required</p>
+                    <p class="console-line">> Initializing authentication...</p>
+                    <p class="console-line delay-1">> Multiple authentication methods available</p>
+                    <p class="console-line delay-2">> Encryption protocol: AES-256</p>
                     <p class="console-line delay-3 highlight">> Select access mode:</p>
                 </div>
                 
@@ -54,6 +54,22 @@
                     </button>
                     <button class="terminal-button secondary" onclick="showRegister()">
                         <span class="button-icon">+</span> CREATE NEW IDENTITY
+                    </button>
+                </div>
+                
+                <!-- Social Login Section -->
+                <div class="social-divider">
+                    <span class="divider-line"></span>
+                    <span class="divider-text">OR</span>
+                    <span class="divider-line"></span>
+                </div>
+                
+                <div class="social-login-group">
+                    <button class="social-button x-button" onclick="loginWithX()">
+                        <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                        </svg>
+                        <span>Continue with X</span>
                     </button>
                 </div>
             </div>
@@ -91,6 +107,22 @@
                         </button>
                     </div>
                 </form>
+                
+                <!-- Social Login in Login Screen -->
+                <div class="social-divider">
+                    <span class="divider-line"></span>
+                    <span class="divider-text">OR</span>
+                    <span class="divider-line"></span>
+                </div>
+                
+                <div class="social-login-group">
+                    <button class="social-button x-button" onclick="loginWithX()">
+                        <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                        </svg>
+                        <span>Continue with X</span>
+                    </button>
+                </div>
             </div>
 
             <!-- Register Screen - Step 1: Send Verification Code -->
@@ -130,6 +162,22 @@
                         </button>
                     </div>
                 </form>
+                
+                <!-- Social Login in Register Screen -->
+                <div class="social-divider">
+                    <span class="divider-line"></span>
+                    <span class="divider-text">OR</span>
+                    <span class="divider-line"></span>
+                </div>
+                
+                <div class="social-login-group">
+                    <button class="social-button x-button" onclick="loginWithX()">
+                        <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                        </svg>
+                        <span>Continue with X</span>
+                    </button>
+                </div>
             </div>
 
             <!-- Register Screen - Step 2: Verify Code & Set Password -->
