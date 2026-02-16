@@ -1,416 +1,675 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="utf-8">
-<title>Console -Complicate-</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Console -Complicate-</title>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=Orbitron:wght@700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #00ff41;
+            --secondary: #00d4ff;
+            --accent: #ff00ff;
+            --warning: #ffaa00;
+            --error: #ff0055;
+            --bg-dark: #000000;
+            --bg-darker: #0a0a0a;
+            --bg-console: #0d1117;
+            --border: #1a1a1a;
+            --text: #00ff41;
+            --text-dim: #33ff66;
+            --text-dimmer: #156629;
+        }
 
-<style>
-html,body{
-  margin:0;
-  padding:0;
-  width:100%;
-  height:100%;
-  background:#000;
-  color:#ccc;
-  font-family:Consolas,Menlo,monospace;
-  overflow:hidden;
-}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-#boot-screen{
-  position:fixed;
-  inset:0;
-  background:#000;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  z-index:9999;
-  animation:bootFadeOut 4.5s ease forwards;
-  animation-delay:3.5s;
-}
-#boot-screen .logo{
-  font-size:48px;
-  color:#666;
-  opacity:0;
-  animation:imageFadeIn 2.5s ease forwards;
-  font-weight:bold;
-  letter-spacing:0.3em;
-}
-@keyframes imageFadeIn{from{opacity:0}to{opacity:1}}
-@keyframes bootFadeOut{to{opacity:0;pointer-events:none}}
+        body {
+            font-family: 'IBM Plex Mono', 'Share Tech Mono', monospace;
+            background: var(--bg-dark);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-#top-credit{
-  position:fixed;
-  top:12px;
-  left:50%;
-  transform:translateX(-50%);
-  font-size:11px;
-  letter-spacing:.25em;
-  color:#666;
-  opacity:.6;
-}
+        /* Boot Screen */
+        #boot-screen {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            animation: bootFadeOut 4.5s ease forwards;
+            animation-delay: 3.5s;
+        }
 
-.measure-line{
-  position:fixed;
-  left:0;
-  width:100%;
-  height:1px;
-  background:repeating-linear-gradient(
-    to right,
-    transparent 0,
-    #333 20px,
-    transparent 40px
-  );
-  opacity:.4;
-}
-#measure-top{top:56px}
-#measure-bottom{bottom:56px}
+        #boot-screen .logo {
+            font-size: 48px;
+            color: var(--primary);
+            opacity: 0;
+            animation: imageFadeIn 2.5s ease forwards;
+            font-weight: bold;
+            letter-spacing: 0.3em;
+            text-shadow: 0 0 20px var(--primary);
+        }
 
-.fake-barcode{
-  position:fixed;
-  top:0;
-  width:14px;
-  height:100%;
-  background:repeating-linear-gradient(
-    to bottom,
-    #444 0px,
-    #444 3px,
-    transparent 3px,
-    transparent 6px
-  );
-  opacity:.35;
-}
-#barcode-left{left:8px}
-#barcode-right{right:8px}
+        @keyframes imageFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
 
-#center-fragments{
-  position:fixed;
-  top:48%;
-  left:10%;
-  width:80%;
-  height:1px;
-  background:repeating-linear-gradient(
-    to right,
-    #555 0px,
-    #555 30px,
-    transparent 30px,
-    transparent 80px
-  );
-  opacity:.45;
-}
+        @keyframes bootFadeOut {
+            to { opacity: 0; pointer-events: none; }
+        }
 
-#info-block{
-  position:fixed;
-  bottom:24px;
-  left:24px;
-  font-size:11px;
-  line-height:1.6;
-  color:#888;
-  border:1px solid #333;
-  padding:10px 14px;
-  background:rgba(0,0,0,.35);
-}
-.ib-title{font-weight:bold;letter-spacing:.2em;margin-bottom:6px}
+        /* Effects */
+        .crt-overlay, .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+        }
 
-#side-mark{
-  position:fixed;
-  right:22px;
-  top:50%;
-  transform:translateY(-50%);
-  display:flex;
-  flex-direction:column;
-  gap:6px;
-  font-size:14px;
-  letter-spacing:.3em;
-  color:#777;
-  opacity:.7;
-}
+        .scanlines {
+            background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.05) 50%, rgba(0, 0, 0, 0.05));
+            background-size: 100% 4px;
+            animation: scanlines 0.1s linear infinite;
+        }
 
-#frame{
-  position:absolute;
-  inset:0;
-  padding:80px 40px;
-}
+        @keyframes scanlines {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 4px; }
+        }
 
-#console{max-width:520px}
-#log{
-  font-size:12px;
-  line-height:1.8;
-  margin-bottom:12px;
-  color:#aaa;
-}
-#input{
-  width:100%;
-  background:transparent;
-  border:none;
-  border-bottom:1px solid #333;
-  color:#ccc;
-  font-size:13px;
-  outline:none;
-}
+        .scan-line {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(to bottom, transparent, rgba(0, 255, 65, 0.5), transparent);
+            animation: scan 6s linear infinite;
+            z-index: 9998;
+            pointer-events: none;
+        }
 
-.addon-monument{
-  margin-top:18px;
-  padding-top:12px;
-  border-top:1px dashed #333;
-}
+        @keyframes scan {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(100vh); }
+        }
 
-.addon-lines{
-  display:grid;
-  grid-template-columns:repeat(6,1fr);
-  gap:10px;
-  margin-bottom:8px;
-}
-.addon-lines span{
-  height:2px;
-  background:linear-gradient(to right,transparent,#555,transparent);
-  opacity:.6;
-}
-.addon-lines.dense span{
-  height:1px;
-  opacity:.35;
-}
+        .noise {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9998;
+            opacity: 0.03;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            animation: noise 0.2s steps(10) infinite;
+        }
 
-.addon-barcode{
-  display:flex;
-  gap:2px;
-  margin-bottom:8px;
-}
-.addon-barcode i{
-  width:3px;
-  height:36px;
-  background:#777;
-  opacity:.15;
-}
-.addon-barcode.thin i{
-  height:28px;
-  opacity:.12;
-}
-.addon-barcode i:nth-child(2n){opacity:.25}
-.addon-barcode i:nth-child(4n){opacity:.45}
-.addon-barcode i:nth-child(7n){opacity:.6}
+        @keyframes noise {
+            0%, 100% { transform: translate(0, 0); }
+            10% { transform: translate(-5%, -5%); }
+            20% { transform: translate(-10%, 5%); }
+            30% { transform: translate(5%, -10%); }
+            40% { transform: translate(-5%, 15%); }
+            50% { transform: translate(-10%, 5%); }
+            60% { transform: translate(15%, 0); }
+            70% { transform: translate(0, 10%); }
+            80% { transform: translate(-15%, 0); }
+            90% { transform: translate(10%, 5%); }
+        }
 
-.addon-label{
-  font-size:10px;
-  letter-spacing:.25em;
-  color:#777;
-  line-height:1.6;
-}
+        /* Logout Button */
+        #logout-btn {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            font-size: 11px;
+            color: var(--text-dim);
+            background: transparent;
+            border: 2px solid var(--border);
+            padding: 8px 16px;
+            cursor: pointer;
+            font-family: 'IBM Plex Mono', monospace;
+            letter-spacing: 0.1em;
+            transition: all 0.3s;
+            z-index: 100;
+        }
 
-#right-text{
-  position:absolute;
-  top:80px;
-  right:40px;
-  width:380px;
-  font-size:12px;
-  line-height:1.9;
-  color:#9a9a9a;
-  opacity:.85;
-}
-#right-text p{margin:0 0 14px}
-.keyword{color:#ccc}
+        #logout-btn:hover {
+            background: rgba(0, 255, 65, 0.1);
+            color: var(--text);
+            border-color: var(--primary);
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.3);
+        }
 
-#confirmed-panel{
-  position:fixed;
-  bottom:24px;
-  left:240px;
-  font-size:11px;
-  color:#777;
-  opacity:0;
-}
-#post-x{
-  display:none;
-  margin-top:12px;
-  font-size:11px;
-  color:#aaa;
-  text-decoration:none;
-  border:1px solid #333;
-  padding:6px 10px;
-}
-#post-x:hover{background:#111}
+        /* Terminal Container */
+        .terminal-container {
+            width: 90%;
+            max-width: 900px;
+            background: var(--bg-console);
+            border: 2px solid var(--border);
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.2), 0 0 60px rgba(0, 255, 65, 0.1), inset 0 0 100px rgba(0, 0, 0, 0.5);
+            animation: terminalGlow 2s ease-in-out infinite alternate;
+            position: relative;
+            z-index: 1;
+        }
 
-.fade-in{animation:fadeIn .8s ease forwards}
-.glitch{animation:glitch .25s steps(2) 3}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-@keyframes glitch{0%{opacity:1}50%{opacity:.2}100%{opacity:1}}
+        @keyframes terminalGlow {
+            0% { box-shadow: 0 0 20px rgba(0, 255, 65, 0.2), 0 0 60px rgba(0, 255, 65, 0.1), inset 0 0 100px rgba(0, 0, 0, 0.5); }
+            100% { box-shadow: 0 0 30px rgba(0, 255, 65, 0.3), 0 0 80px rgba(0, 255, 65, 0.15), inset 0 0 100px rgba(0, 0, 0, 0.5); }
+        }
 
-#logout-btn{
-  position:fixed;
-  top:24px;
-  right:24px;
-  font-size:11px;
-  color:#777;
-  background:transparent;
-  border:1px solid #333;
-  padding:8px 16px;
-  cursor:pointer;
-  font-family:Consolas,Menlo,monospace;
-  letter-spacing:.1em;
-}
-#logout-btn:hover{
-  background:#111;
-  color:#aaa;
-}
+        .terminal-header {
+            background: #161b22;
+            padding: 12px 20px;
+            border-bottom: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
 
-@media (max-width: 768px) {
-  #right-text{
-    position:relative;
-    width:100%;
-    right:0;
-    margin-top:40px;
-  }
-  #frame{
-    padding:60px 20px;
-  }
-}
-</style>
+        .terminal-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .control-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .control-dot.red { background: #ff5f56; box-shadow: 0 0 5px #ff5f56; }
+        .control-dot.yellow { background: #ffbd2e; box-shadow: 0 0 5px #ffbd2e; }
+        .control-dot.green { background: #27c93f; box-shadow: 0 0 5px #27c93f; }
+
+        .terminal-title {
+            font-family: 'Orbitron', 'IBM Plex Mono', sans-serif;
+            font-weight: 700;
+            color: var(--primary);
+            text-shadow: 0 0 10px var(--primary);
+            letter-spacing: 2px;
+            font-size: 14px;
+        }
+
+        .terminal-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--primary);
+            box-shadow: 0 0 8px var(--primary);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .terminal-body {
+            padding: 40px;
+            min-height: 500px;
+        }
+
+        /* Info Block */
+        .info-block {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(0, 255, 65, 0.05);
+            border-left: 3px solid var(--primary);
+        }
+
+        .info-block .title {
+            font-weight: bold;
+            letter-spacing: 0.2em;
+            margin-bottom: 10px;
+            color: var(--primary);
+            font-size: 14px;
+        }
+
+        .info-block div {
+            font-size: 12px;
+            line-height: 1.8;
+            color: var(--text-dim);
+        }
+
+        /* Console Area */
+        .console-area {
+            margin-top: 30px;
+        }
+
+        #log {
+            font-size: 14px;
+            line-height: 1.8;
+            margin-bottom: 20px;
+            color: var(--text);
+            min-height: 100px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--bg-darker);
+            padding: 12px 15px;
+            border: 2px solid var(--border);
+            transition: all 0.3s;
+        }
+
+        .input-wrapper:focus-within {
+            border-color: var(--primary);
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.3);
+        }
+
+        .terminal-prompt {
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        #input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 14px;
+            outline: none;
+        }
+
+        /* Monument Decorations */
+        .addon-monument {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px dashed var(--border);
+        }
+
+        .addon-lines {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .addon-lines span {
+            height: 2px;
+            background: linear-gradient(to right, transparent, var(--primary), transparent);
+            opacity: 0.3;
+        }
+
+        .addon-lines.dense span {
+            height: 1px;
+            opacity: 0.2;
+        }
+
+        .addon-barcode {
+            display: flex;
+            gap: 2px;
+            margin-bottom: 12px;
+        }
+
+        .addon-barcode i {
+            width: 3px;
+            height: 36px;
+            background: var(--primary);
+            opacity: 0.15;
+        }
+
+        .addon-barcode.thin i {
+            height: 28px;
+            opacity: 0.12;
+        }
+
+        .addon-barcode i:nth-child(2n) { opacity: 0.25; }
+        .addon-barcode i:nth-child(4n) { opacity: 0.45; }
+        .addon-barcode i:nth-child(7n) { opacity: 0.6; }
+
+        .addon-label {
+            font-size: 11px;
+            letter-spacing: 0.15em;
+            color: var(--text-dimmer);
+            line-height: 1.8;
+        }
+
+        /* Description Text */
+        .description-text {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(0, 255, 65, 0.03);
+            border: 1px solid var(--border);
+        }
+
+        .description-text p {
+            font-size: 13px;
+            line-height: 1.9;
+            color: var(--text-dim);
+            margin-bottom: 14px;
+        }
+
+        .description-text p:last-child {
+            margin-bottom: 0;
+        }
+
+        .keyword {
+            color: var(--primary);
+            font-weight: 600;
+            text-shadow: 0 0 5px var(--primary);
+        }
+
+        /* Post Button */
+        #post-x {
+            display: none;
+            margin-top: 20px;
+            padding: 14px 24px;
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            font-family: 'IBM Plex Mono', monospace;
+            font-weight: 600;
+            font-size: 13px;
+            text-decoration: none;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 1px;
+        }
+
+        #post-x::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: var(--primary);
+            opacity: 0.2;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        #post-x:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        #post-x:hover {
+            box-shadow: 0 0 20px var(--primary);
+            transform: translateY(-2px);
+        }
+
+        /* Confirmed Panel */
+        #confirmed-panel {
+            margin-top: 20px;
+            padding: 15px;
+            font-size: 13px;
+            color: var(--primary);
+            background: rgba(0, 255, 65, 0.1);
+            border: 2px solid var(--primary);
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.3);
+            opacity: 0;
+            text-align: center;
+            font-weight: 600;
+            letter-spacing: 2px;
+        }
+
+        /* Animations */
+        .fade-in {
+            animation: fadeIn 0.8s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .glitch {
+            animation: glitch 0.25s steps(2) 3;
+        }
+
+        @keyframes glitch {
+            0% { opacity: 1; }
+            50% { opacity: 0.2; }
+            100% { opacity: 1; }
+        }
+
+        /* Terminal Footer */
+        .terminal-footer {
+            background: #161b22;
+            padding: 12px 20px;
+            border-top: 2px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: var(--text-dimmer);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .terminal-container {
+                width: 95%;
+            }
+            .terminal-body {
+                padding: 20px;
+            }
+            #logout-btn {
+                top: 10px;
+                right: 10px;
+                padding: 6px 12px;
+                font-size: 10px;
+            }
+        }
+    </style>
 </head>
-
 <body>
+    <!-- Effects -->
+    <div class="scanlines"></div>
+    <div class="scan-line"></div>
+    <div class="noise"></div>
 
-<div id="boot-screen">
-  <div class="logo"><img src="team (1).svg"></div>
-</div>
-
-<button id="logout-btn" onclick="logout()">LOGOUT</button>
-
-<div id="top-credit">© Team:還遭霊 / Team:GenSouRei</div>
-<div id="measure-top" class="measure-line"></div>
-<div id="measure-bottom" class="measure-line"></div>
-<div id="barcode-left" class="fake-barcode"></div>
-<div id="barcode-right" class="fake-barcode"></div>
-<div id="center-fragments"></div>
-
-<div id="info-block">
-  <div class="ib-title">T:G3L</div>
-  <div>PHASE : <span id="phase">0</span></div>
-  <div>STATUS : OBSERVING</div>
-  <div>NODE : ACTIVE</div>
-  <div>USER : <span id="username">LOADING...</span></div>
-</div>
-
-<div id="side-mark"><span>T</span><span>G</span><span>3</span><span>L</span></div>
-
-<div id="frame">
-  <div id="console">
-    <div id="log">INPUT COMMAND.</div>
-    <input id="input" autocomplete="off">
-
-    <div class="addon-monument">
-      <div class="addon-lines">
-        <span></span><span></span><span></span>
-        <span></span><span></span><span></span>
-      </div>
-      <div class="addon-lines dense">
-        <span></span><span></span><span></span>
-        <span></span><span></span><span></span>
-      </div>
-
-      <div class="addon-barcode">
-        <i></i><i></i><i></i><i></i><i></i>
-        <i></i><i></i><i></i><i></i><i></i>
-        <i></i><i></i><i></i><i></i><i></i>
-      </div>
-      <div class="addon-barcode thin">
-        <i></i><i></i><i></i><i></i><i></i>
-        <i></i><i></i><i></i><i></i><i></i>
-      </div>
-
-      <div class="addon-label">
-        MONUMENT NODE : B-04<br>
-        SIGNAL STATUS : OBSERVING<br>
-        DIMENSION LINK : ACTIVE
-      </div>
+    <!-- Boot Screen -->
+    <div id="boot-screen">
+        <div class="logo">GENSOUREI</div>
     </div>
 
-    <a id="post-x" target="_blank">POST RESULT TO X</a>
-  </div>
+    <!-- Logout Button -->
+    <button id="logout-btn" onclick="logout()">LOGOUT</button>
 
-  <div id="right-text">
-    <p>This is a space named only as the boundary that lies between reality and fiction.</p>
-    <p>All beings, perceptions, and concepts that exist in this world converge here.</p>
-    <p>Dimensions extend like branching paths.</p>
-    <p>Dimensions ultimately arrive at this boundary.</p>
-    <p>Dimensions unfold as four-dimensional space, the three-dimensional plane in which we reside,<br>
-       the two-dimensional plane that exists upon a surface,<br>
-       and the one-dimensional line defined only by length.</p>
-    <p>What we are primarily able to observe and create are these three alone.</p>
-    <p>However, beyond them exist numerous dimensions that we are unable to perceive.</p>
-    <p>The place where all of those dimensions gather is here.</p>
-    <p>Countless stories exist, branching endlessly like limbs of a tree.</p>
-    <p>We call this phenomenon "<span class="keyword">Gensourei</span>".</p>
-  </div>
-</div>
+    <!-- Terminal Container -->
+    <div class="terminal-container">
+        <!-- Header -->
+        <div class="terminal-header">
+            <div class="terminal-controls">
+                <span class="control-dot red"></span>
+                <span class="control-dot yellow"></span>
+                <span class="control-dot green"></span>
+            </div>
+            <div class="terminal-title">T:G3L CONSOLE</div>
+            <div class="terminal-status">
+                <span class="status-indicator"></span>
+                <span>ONLINE</span>
+            </div>
+        </div>
 
-<div id="confirmed-panel"></div>
+        <!-- Body -->
+        <div class="terminal-body">
+            <!-- Info Block -->
+            <div class="info-block">
+                <div class="title">T:G3L SYSTEM</div>
+                <div>PHASE : <span id="phase">0</span></div>
+                <div>STATUS : OBSERVING</div>
+                <div>NODE : ACTIVE</div>
+                <div>USER : <span id="username">LOADING...</span></div>
+            </div>
 
-<script src="config.js"></script>
-<script>
-// 認証チェック
-function checkAuth() {
-  const token = localStorage.getItem('boundary_token');
-  if (!token) {
-    window.location.href = 'index.html';
-    return;
-  }
-  
-  const userData = localStorage.getItem('boundary_user');
-  if (userData) {
-    const user = JSON.parse(userData);
-    document.getElementById('username').textContent = user.scratchUsername || 'UNKNOWN';
-  }
-}
+            <!-- Console Area -->
+            <div class="console-area">
+                <div id="log">INPUT COMMAND.</div>
+                <div class="input-wrapper">
+                    <span class="terminal-prompt">></span>
+                    <input id="input" type="text" autocomplete="off">
+                </div>
+            </div>
 
-function logout() {
-  if (confirm('ログアウトしますか？')) {
-    localStorage.removeItem('boundary_token');
-    localStorage.removeItem('boundary_user');
-    window.location.href = 'index.html';
-  }
-}
+            <!-- Monument Decorations -->
+            <div class="addon-monument">
+                <div class="addon-lines">
+                    <span></span><span></span><span></span>
+                    <span></span><span></span><span></span>
+                </div>
+                <div class="addon-lines dense">
+                    <span></span><span></span><span></span>
+                    <span></span><span></span><span></span>
+                </div>
 
-checkAuth();
+                <div class="addon-barcode">
+                    <i></i><i></i><i></i><i></i><i></i>
+                    <i></i><i></i><i></i><i></i><i></i>
+                    <i></i><i></i><i></i><i></i><i></i>
+                </div>
+                <div class="addon-barcode thin">
+                    <i></i><i></i><i></i><i></i><i></i>
+                    <i></i><i></i><i></i><i></i><i></i>
+                </div>
 
-setTimeout(()=>{document.getElementById("boot-screen")?.remove()},8000);
+                <div class="addon-label">
+                    MONUMENT NODE : B-04<br>
+                    SIGNAL STATUS : OBSERVING<br>
+                    DIMENSION LINK : ACTIVE
+                </div>
+            </div>
 
-const input=document.getElementById("input");
-const log=document.getElementById("log");
-const phaseEl=document.getElementById("phase");
-const confirmedPanel=document.getElementById("confirmed-panel");
-const postX=document.getElementById("post-x");
+            <!-- Description Text -->
+            <div class="description-text">
+                <p>This is a space named only as the boundary that lies between reality and fiction.</p>
+                <p>All beings, perceptions, and concepts that exist in this world converge here.</p>
+                <p>Dimensions extend like branching paths.</p>
+                <p>Dimensions ultimately arrive at this boundary.</p>
+                <p>Dimensions unfold as four-dimensional space, the three-dimensional plane in which we reside, the two-dimensional plane that exists upon a surface, and the one-dimensional line defined only by length.</p>
+                <p>What we are primarily able to observe and create are these three alone.</p>
+                <p>However, beyond them exist numerous dimensions that we are unable to perceive.</p>
+                <p>The place where all of those dimensions gather is here.</p>
+                <p>Countless stories exist, branching endlessly like limbs of a tree.</p>
+                <p>We call this phenomenon "<span class="keyword">Gensourei</span>".</p>
+            </div>
 
-const answers=["MISSION_I_COMPLETE"];
-const confirmed=new Set();
+            <!-- Confirmed Panel -->
+            <div id="confirmed-panel"></div>
 
-input.addEventListener("keydown",e=>{
-  if(e.key!=="Enter")return;
-  const cmd=input.value.trim();
-  input.value="";
+            <!-- Post Button -->
+            <a id="post-x" href="#" target="_blank">POST RESULT TO X</a>
+        </div>
 
-  if(answers.includes(cmd)&&!confirmed.has(cmd)){
-    confirmed.add(cmd);
-    const p=confirmed.size;
+        <!-- Footer -->
+        <div class="terminal-footer">
+            <span>© Team:還遭霊 / Team:GenSouRei</span>
+            <span>BOUNDARY SYSTEM v1.0</span>
+        </div>
+    </div>
 
-    log.textContent="VERIFYING INPUT...";
-    log.className="glitch";
+    <script>
+        // 認証チェック
+        function checkAuth() {
+            const token = localStorage.getItem('boundary_token');
+            if (!token) {
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            const userData = localStorage.getItem('boundary_user');
+            if (userData) {
+                const user = JSON.parse(userData);
+                document.getElementById('username').textContent = user.scratchUsername || 'UNKNOWN';
+            }
+        }
 
-    setTimeout(()=>{
-      log.className="";
-      log.textContent="ANSWER CONFIRMED.";
-      log.classList.add("fade-in");
+        function logout() {
+            if (confirm('ログアウトしますか？')) {
+                localStorage.removeItem('boundary_token');
+                localStorage.removeItem('boundary_user');
+                window.location.href = 'index.html';
+            }
+        }
 
-      phaseEl.textContent=p;
-      confirmedPanel.textContent=`CONFIRMED NODE ${p}`;
-      confirmedPanel.classList.add("fade-in");
-      confirmedPanel.style.opacity=1;
+        checkAuth();
 
-      const d=new Date();
-      const today=
-        d.getFullYear()+"/"+
-        String(d.getMonth()+1).padStart(2,"0")+"/"+
-        String(d.getDate()).padStart(2,"0");
+        // Boot screen removal
+        setTimeout(() => {
+            const bootScreen = document.getElementById("boot-screen");
+            if (bootScreen) bootScreen.remove();
+        }, 8000);
 
-      const postText=
+        // Console logic
+        const input = document.getElementById("input");
+        const log = document.getElementById("log");
+        const phaseEl = document.getElementById("phase");
+        const confirmedPanel = document.getElementById("confirmed-panel");
+        const postX = document.getElementById("post-x");
+
+        const answers = ["MISSION_I_COMPLETE"];
+        const confirmed = new Set();
+
+        input.addEventListener("keydown", e => {
+            if (e.key !== "Enter") return;
+            const cmd = input.value.trim();
+            input.value = "";
+
+            if (answers.includes(cmd) && !confirmed.has(cmd)) {
+                confirmed.add(cmd);
+                const p = confirmed.size;
+
+                log.textContent = "VERIFYING INPUT...";
+                log.className = "glitch";
+
+                setTimeout(() => {
+                    log.className = "";
+                    log.textContent = "ANSWER CONFIRMED.";
+                    log.classList.add("fade-in");
+
+                    phaseEl.textContent = p;
+                    confirmedPanel.textContent = `CONFIRMED NODE ${p}`;
+                    confirmedPanel.classList.add("fade-in");
+                    confirmedPanel.style.opacity = 1;
+
+                    const d = new Date();
+                    const today =
+                        d.getFullYear() + "/" +
+                        String(d.getMonth() + 1).padStart(2, "0") + "/" +
+                        String(d.getDate()).padStart(2, "0");
+
+                    const postText = 
 `◤◢◤調査完了◢◤◢
 
 あなたはログデータ「mission I」の問題を解決し、
@@ -422,35 +681,37 @@ input.addEventListener("keydown",e=>{
 
 #バベ尖 #バベルの尖塔 #ARG #リアルタイム`;
 
-      postX.href="https://x.com/intent/post?text="+encodeURIComponent(postText);
-      postX.style.display="block";
-      postX.classList.add("fade-in");
-      
-      saveProgress('MISSION_I', 'COMPLETE', {completedAt: today});
-    },1200);
-  }else{
-    log.textContent="NO RESPONSE.";
-  }
-});
+                    postX.href = "https://x.com/intent/post?text=" + encodeURIComponent(postText);
+                    postX.style.display = "block";
+                    postX.classList.add("fade-in");
+                    
+                    saveProgress('MISSION_I', 'COMPLETE', {completedAt: today});
+                }, 1200);
+            } else {
+                log.textContent = "NO RESPONSE.";
+            }
+        });
 
-async function saveProgress(challenge, status, data) {
-  const token = localStorage.getItem('boundary_token');
-  if (!token) return;
-  
-  try {
-    await fetch(`${API_CONFIG.BASE_URL}/api/progress`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({ challenge, status, data })
-    });
-  } catch (error) {
-    console.error('Progress save error:', error);
-  }
-}
-</script>
-
+        async function saveProgress(challenge, status, data) {
+            const token = localStorage.getItem('boundary_token');
+            if (!token) return;
+            
+            try {
+                // API_CONFIG が定義されている場合のみ実行
+                if (typeof API_CONFIG !== 'undefined') {
+                    await fetch(`${API_CONFIG.BASE_URL}/api/progress`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ challenge, status, data })
+                    });
+                }
+            } catch (error) {
+                console.error('Progress save error:', error);
+            }
+        }
+    </script>
 </body>
 </html>
