@@ -1169,6 +1169,7 @@ function initApp() {
   renderReportHistory();
   updateModeButtons();
   startLogFeed();
+  initSerialInput();
   setTimeout(() => {
     document.querySelectorAll('.signal-fill').forEach(el => { el.style.width = el.dataset.w + '%'; });
   }, 300);
@@ -1411,8 +1412,9 @@ function renderProfileStats() {
 // ═══════════════════════════════════════════════════
 //  SERIAL CODE
 // ═══════════════════════════════════════════════════
-document.addEventListener('DOMContentLoaded', () => {
+function initSerialInput() {
   const si = document.getElementById('serial-input');
+  if (!si) return;
   si.addEventListener('input', e => {
     let v = e.target.value.replace(/[^a-zA-Z0-9]/g,'').toUpperCase();
     if (v.length > 4)  v = v.slice(0,4) + '-' + v.slice(4);
@@ -1421,7 +1423,7 @@ document.addEventListener('DOMContentLoaded', () => {
     e.target.value = v;
   });
   si.addEventListener('keydown', e => { if(e.key==='Enter') validateSerial(); });
-});
+}
 
 async function validateSerial() {
   const val = document.getElementById('serial-input').value.trim().toUpperCase();
