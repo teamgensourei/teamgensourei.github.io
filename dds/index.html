@@ -452,6 +452,14 @@ body::before{
 .login-tab.active{background:rgba(0,229,255,.08);color:var(--accent);}
 .login-err{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--danger);min-height:16px;margin-top:8px;letter-spacing:.06em;}
 .login-info{font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--text-dim);margin-top:14px;line-height:1.8;letter-spacing:.04em;}
+.login-divider{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);text-align:center;margin:14px 0;letter-spacing:.15em;}
+.btn-twitter{
+  width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);
+  color:var(--text);font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:.1em;
+  padding:10px;display:flex;align-items:center;justify-content:center;gap:8px;
+  transition:all .2s;cursor:pointer;
+}
+.btn-twitter:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.25);}
 
 /* ─── NOTIFICATION ─── */
 .notif{
@@ -483,6 +491,28 @@ body::before{
 .bottom-row{display:grid;grid-template-columns:1fr 260px;gap:10px;}
 @media(max-width:900px){.bottom-row{grid-template-columns:1fr;}}
 </style>
+
+<!-- ═══ FIREBASE SDK ═══ -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey:            "AIzaSyDyKbSlrn6klhCxugkQcKpkfnDLL86Ce4A",
+  authDomain:        "echo-liminal.firebaseapp.com",
+  projectId:         "echo-liminal",
+  storageBucket:     "echo-liminal.firebasestorage.app",
+  messagingSenderId: "953303593658",
+  appId:             "1:953303593658:web:61c5db0cb03f0b0704c883"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db   = firebase.firestore();
+
+// Twitter プロバイダ
+const twitterProvider = new firebase.auth.TwitterAuthProvider();
+</script>
+<!-- ═══ /FIREBASE SDK ═══ -->
 </head>
 <body>
 
@@ -499,7 +529,7 @@ body::before{
   <div class="login-box">
     <div class="login-hdr">
       <div class="login-logo">LIMINAL</div>
-      <div class="login-sub">// エージェント認証システム</div>
+      <div class="login-sub">// エージェント認証システム // Firebase Auth</div>
     </div>
     <div class="login-body">
       <div class="login-tabs">
@@ -508,22 +538,29 @@ body::before{
       </div>
       <!-- LOGIN FORM -->
       <div id="tab-login">
-        <div class="form-group"><div class="form-label">AGENT ID (EMAIL)</div><input class="form-input" id="li-email" type="email" placeholder="agent@liminal.sys"></div>
-        <div class="form-group" style="margin-top:10px;"><div class="form-label">ACCESS KEY (PASSWORD)</div><input class="form-input" id="li-pass" type="password" placeholder="••••••••"></div>
+        <div class="form-group"><div class="form-label">EMAIL</div><input class="form-input" id="li-email" type="email" placeholder="agent@example.com"></div>
+        <div class="form-group" style="margin-top:10px;"><div class="form-label">PASSWORD</div><input class="form-input" id="li-pass" type="password" placeholder="••••••••"></div>
         <div class="login-err" id="li-err"></div>
         <button class="btn-accent" style="width:100%;margin-top:12px;padding:11px;" onclick="doLogin()">AUTHENTICATE →</button>
-        <div class="login-info">
-          ※ テスト用: <em style="color:var(--accent)">test@liminal.sys</em> / <em style="color:var(--accent)">password123</em><br>
-          ※ または新規エージェント登録
-        </div>
+        <div class="login-divider">── OR ──</div>
+        <button class="btn-twitter" onclick="doTwitterLogin()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.742l7.73-8.835L1.254 2.25H8.08l4.259 5.63zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          Continue with X (Twitter)
+        </button>
+        <div class="login-info">※ ECHO PROTOCOLのアカウントでもログインできます</div>
       </div>
       <!-- REGISTER FORM -->
       <div id="tab-register" style="display:none;">
         <div class="form-group"><div class="form-label">AGENT NAME (コードネーム)</div><input class="form-input" id="rg-name" type="text" placeholder="PHANTOM-XXX"></div>
-        <div class="form-group" style="margin-top:10px;"><div class="form-label">EMAIL</div><input class="form-input" id="rg-email" type="email" placeholder="agent@liminal.sys"></div>
-        <div class="form-group" style="margin-top:10px;"><div class="form-label">PASSWORD</div><input class="form-input" id="rg-pass" type="password" placeholder="8文字以上"></div>
+        <div class="form-group" style="margin-top:10px;"><div class="form-label">EMAIL</div><input class="form-input" id="rg-email" type="email" placeholder="agent@example.com"></div>
+        <div class="form-group" style="margin-top:10px;"><div class="form-label">PASSWORD (8文字以上)</div><input class="form-input" id="rg-pass" type="password" placeholder="••••••••"></div>
         <div class="login-err" id="rg-err"></div>
         <button class="btn-accent" style="width:100%;margin-top:12px;padding:11px;" onclick="doRegister()">REGISTER AGENT →</button>
+        <div class="login-divider">── OR ──</div>
+        <button class="btn-twitter" onclick="doTwitterLogin()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.742l7.73-8.835L1.254 2.25H8.08l4.259 5.63zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          Continue with X (Twitter)
+        </button>
       </div>
     </div>
   </div>
@@ -556,16 +593,16 @@ body::before{
       </button>
       <button class="nav-item" onclick="nav('transmissions')">
         <svg viewBox="0 0 16 16"><path d="M1 3h14v10H1z"/><path d="M1 3l7 6 7-6"/></svg>
-        DIC-MAIL
+        D4-MAIL
         <span class="nav-badge" id="mail-badge">2</span>
       </button>
       <button class="nav-item disabled">
         <svg viewBox="0 0 16 16"><path d="M2 12l3-3h9V3H2v9z"/></svg>
-        DIC-MESSAGE
+        D4-MESSAGE
       </button>
       <button class="nav-item disabled">
         <svg viewBox="0 0 16 16"><path d="M8 2C4.7 2 2 4.3 2 7c0 1.7.9 3.2 2.2 4.1L3 14l2.8-1.5C6.5 12.8 7.2 13 8 13c3.3 0 6-2.3 6-5s-2.7-5-6-5z"/></svg>
-        DIC-BUTTERFLY
+        D4-BIRD
       </button>
       <div class="nav-section" style="margin-top:6px;">SYSTEM</div>
       <button class="nav-item" onclick="nav('profile')">
@@ -721,7 +758,7 @@ body::before{
 
     <!-- ── SERIAL CODE ── -->
     <div class="page" id="page-serial">
-      <div class="sec-hdr"><div class="sec-title">CONNECT CODE // 解錠インターフェース</div><div class="sec-line"></div></div>
+      <div class="sec-hdr"><div class="sec-title">SERIAL CODE // 解錠インターフェース</div><div class="sec-line"></div></div>
       <div class="panel">
         <div class="panel-hdr"><div class="panel-title">CODE ENTRY</div><div class="panel-sub">UNLOCK NEW CASES</div></div>
         <div class="serial-wrap">
@@ -811,7 +848,7 @@ body::before{
               <label class="toggle"><input type="checkbox" id="notif-missions" checked><span class="toggle-slider"></span></label>
             </div>
             <div class="settings-row">
-              <div class="settings-row-text"><div class="settings-row-lbl">DIC-mail受信通知</div><div class="settings-row-desc">交錯通信受信時に通知します</div></div>
+              <div class="settings-row-text"><div class="settings-row-lbl">D4-MAIL受信通知</div><div class="settings-row-desc">交錯通信受信時に通知します</div></div>
               <label class="toggle"><input type="checkbox" id="notif-mail" checked><span class="toggle-slider"></span></label>
             </div>
             <div class="settings-row">
@@ -881,19 +918,19 @@ body::before{
   </div>
 </div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // ═══════════════════════════════════════════════════
 //  DATA
 // ═══════════════════════════════════════════════════
 const CASES = [
-  { id:'case-001', title:'****年の集合写真素材', desc:'SNS上で突如公開された集合写真を元に、失踪した一人の男性の真相を解き明かせ。', tag:'NEW',      purchaseUrl:'#', gameUrl:'#', thumb:'#0d1520', icon:'001' },
-  { id:'case-002', title:'異新世界へ', desc:'テレビ放送局に届いた一つの古びたホームビデオから、家族の行方を探し出せ。', tag:'ACTIVE',   purchaseUrl:'#', gameUrl:'#', thumb:'#150d0d', icon:'002' },
-  { id:'case-003', title:'Δ∷Яecognise', desc:'人気絶頂の最中消えたバーチャル・シンガー"シルヴァ厶"の消滅の真相を明かせ。', tag:'ACTIVE',   purchaseUrl:'#', gameUrl:'#', thumb:'#0f0d18', icon:'003' },
-  { id:'case-004', title:'幽閉についての調査記録', desc:'とある辺鄙な村で密かに行われている、禁忌の儀式の真相を暴け。', tag:'NEW',      purchaseUrl:'#', gameUrl:'#', thumb:'#0d1520', icon:'004' },
-  { id:'case-005', title:'歯車のウォッチ-clockwork-', desc:'時計の内部に隠された30の謎を解き明かし、時計の持ち主を探し出せ。', tag:'ACTIVE',   purchaseUrl:'#', gameUrl:'#', thumb:'#100d15', icon:'005' },
-  { id:'case-006', title:'二人のチェキ', desc:'チェキに写された少女たちの死の真相を解き明かし、事件を解決せよ。', tag:'ACTIVE',   purchaseUrl:'#', gameUrl:'#', thumb:'#0d1218', icon:'006' },
-  { id:'case-007', title:'機械仕掛けの神への信仰', desc:'SNS上で都市伝説と化した舞台の真実を暴け。', tag:'ACTIVE',   purchaseUrl:'#', gameUrl:'#', thumb:'#120d0d', icon:'007' },
-  { id:'case-008', title:'日記帳', desc:'6つの事故物件のデータを分析し、次の発生を未然に防ぐ法則を導け。', tag:'ACTIVE',   purchaseUrl:'#', gameUrl:'#', thumb:'#0d1520', icon:'008' },
+  { id:'case-001', title:'桶地下', desc:'地下空間より断続的に受信される信号の発信源を特定せよ。暗闇の奥に何かが潜んでいる。', tag:'NEW',      purchaseUrl:'#', gameUrl:'#', thumb:'#0d1520', icon:'001' },
+  { id:'case-002', title:'ノンレゾン 1st写真集〈QUINTET〉', desc:'消えた写真家が残した最後のフィルム現像データを解読し、失われた真実を暴け。', tag:'ACTIVE',   purchaseUrl:'#', gameUrl:'#', thumb:'#150d0d', icon:'002' },
+  { id:'case-003', title:'SILENT DESCENT', desc:'地下第4層で記録された異常振動のパターンを分析し、次の発生座標を予測せよ。', tag:'ACTIVE',   purchaseUrl:'#', gameUrl:'#', thumb:'#0f0d18', icon:'003' },
+  { id:'case-004', title:'少年の声、彼女のうた', desc:'二つの時間軸で交差する記憶の断片を繋ぎ合わせ、消えた少年を追え。', tag:'NEW',      purchaseUrl:'#', gameUrl:'#', thumb:'#0d1520', icon:'004' },
+  { id:'case-005', title:'人のカレンダー', desc:'他人の手帳に記された31の暗号を解読し、隠された約束の場所を突き止めろ。', tag:'ACTIVE',   purchaseUrl:'#', gameUrl:'#', thumb:'#100d15', icon:'005' },
+  { id:'case-006', title:'幽怪食堂', desc:'深夜にだけ現れる食堂の全メニューに隠されたメッセージを解析せよ。', tag:'ACTIVE',   purchaseUrl:'#', gameUrl:'#', thumb:'#0d1218', icon:'006' },
+  { id:'case-007', title:'残置物Archive', desc:'廃墟に残された遺留品群から持ち主の素性と失踪の真相を復元せよ。', tag:'ACTIVE',   purchaseUrl:'#', gameUrl:'#', thumb:'#120d0d', icon:'007' },
+  { id:'case-008', title:'事故物件鑑定士試験', desc:'6つの事故物件のデータを分析し、次の発生を未然に防ぐ法則を導け。', tag:'ACTIVE',   purchaseUrl:'#', gameUrl:'#', thumb:'#0d1520', icon:'008' },
   { id:'case-009', title:'RtS One Last Free Throw', desc:'最後のシュートに隠されたコードを解読し、失われた栄光の夜を取り戻せ。', tag:'ACTIVE',   purchaseUrl:'#', gameUrl:'#', thumb:'#0d1218', icon:'009' },
   { id:'case-010', title:'RtS Family ties', desc:'家族の絆を装った組織の真の目的を暴け。偽りの記録が鍵を握る。', tag:'ACTIVE',   purchaseUrl:'#', gameUrl:'#', thumb:'#0f100d', icon:'010' },
   { id:'case-011', title:'人の交換日記', desc:'見知らぬ二人が交わした日記に埋め込まれた暗号の解読に挑め。', tag:'ACTIVE',   purchaseUrl:'#', gameUrl:'#', thumb:'#100d0d', icon:'011' },
@@ -905,7 +942,7 @@ const CASES = [
 
 const TRANSMISSIONS = [
   { id:'tm-001', from:'SYSTEM', title:'LIMINAL SYS // ようこそ、エージェント', preview:'あなたのエージェント登録が完了しました。閾値システムへのアクセスが許可されています...', date:'2026.02.17 04:21', read:false },
-  { id:'tm-002', from:'DIC-CORE', title:'[ALERT] CASE-002 異常信号検出', preview:'桶地下方面より断続的な異常信号を検出。至急調査を開始してください。暗号化されたデータパケット...', date:'2026.02.16 23:55', read:false },
+  { id:'tm-002', from:'D4-CORE', title:'[ALERT] CASE-002 異常信号検出', preview:'桶地下方面より断続的な異常信号を検出。至急調査を開始してください。暗号化されたデータパケット...', date:'2026.02.16 23:55', read:false },
   { id:'tm-003', from:'AGENT-PHANTOM', title:'Re: 残置物について', preview:'例の遺留品の解析が完了しました。添付の復号化ファイルを参照してください...', date:'2026.02.15 18:30', read:true },
   { id:'tm-004', from:'SYSTEM', title:'シリアルコード: GATE-7F2A-001 発行', preview:'購入確認が完了しました。以下のシリアルコードをBPSに登録してください...', date:'2026.02.14 12:00', read:true },
 ];
@@ -926,38 +963,50 @@ const LASTWORD_DB = {
 };
 
 // ═══════════════════════════════════════════════════
-//  STATE (localStorage)
+//  STATE — ユーザーデータはFirestore、UIのみlocalStorage
 // ═══════════════════════════════════════════════════
-let state = {};
+let currentFbUser = null;  // Firebase User オブジェクト
+let userDoc       = {};    // Firestoreから取得したユーザーデータ
 
-function loadState() {
-  try { state = JSON.parse(localStorage.getItem('liminal_state') || '{}'); } catch(e) { state = {}; }
-  if (!state.users)       state.users = [{ email:'test@liminal.sys', pass:'password123', name:'AGENT-TEST', reg:'2026.02.17', mode:'STANDARD' }];
-  if (!state.currentUser) state.currentUser = null;
-  if (!state.connected)   state.connected = {};    // { userId: [caseId,...] }
-  if (!state.completed)   state.completed = {};    // { userId: [{caseId,word,date}] }
-  if (!state.unlockHist)  state.unlockHist = {};   // { userId: [{code,label,date}] }
-  if (!state.usedCodes)   state.usedCodes  = {};   // { code: true }
-  if (!state.reportHist)  state.reportHist = {};   // { userId: [{caseId,word,date}] }
-  if (!state.readMails)   state.readMails  = {};
-  saveState();
+// localStorageキー: ゲームデータ（接続・完了・履歴）はFirestoreに保存
+// usedCodesはFirestore上のグローバルコレクションで管理
+
+function uid() { return currentFbUser ? currentFbUser.uid : null; }
+
+async function loadUserDoc() {
+  if (!uid()) return;
+  const snap = await db.collection('users').doc(uid()).get();
+  if (snap.exists) {
+    userDoc = snap.data();
+  } else {
+    // 初回: ドキュメント作成
+    const now = new Date();
+    const reg = `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')}`;
+    userDoc = {
+      name:        currentFbUser.displayName || 'AGENT-' + uid().slice(0,5).toUpperCase(),
+      email:       currentFbUser.email || '',
+      reg,
+      mode:        'STANDARD',
+      connected:   [],
+      completed:   [],
+      unlockHist:  [],
+      reportHist:  [],
+      readMails:   {},
+    };
+    await db.collection('users').doc(uid()).set(userDoc);
+  }
 }
 
-function saveState() {
-  localStorage.setItem('liminal_state', JSON.stringify(state));
+async function saveUserDoc(partial) {
+  if (!uid()) return;
+  Object.assign(userDoc, partial);
+  await db.collection('users').doc(uid()).update(partial);
 }
 
-function getUser() {
-  if (!state.currentUser) return null;
-  return state.users.find(u => u.email === state.currentUser) || null;
-}
-
-function uid() { const u = getUser(); return u ? u.email : null; }
-
-function getConnected() { const u = uid(); return u ? (state.connected[u] || []) : []; }
-function getCompleted()  { const u = uid(); return u ? (state.completed[u] || []) : []; }
-function getUnlockHist() { const u = uid(); return u ? (state.unlockHist[u] || []) : []; }
-function getReportHist() { const u = uid(); return u ? (state.reportHist[u] || []) : []; }
+function getConnected()  { return userDoc.connected   || []; }
+function getCompleted()  { return userDoc.completed   || []; }
+function getUnlockHist() { return userDoc.unlockHist  || []; }
+function getReportHist() { return userDoc.reportHist  || []; }
 
 // ═══════════════════════════════════════════════════
 //  BOOT SEQUENCE
@@ -971,24 +1020,30 @@ const BOOT_MSGS = [
 ];
 
 document.addEventListener('DOMContentLoaded', () => {
-  loadState();
   let i = 0;
   const msgEl = document.getElementById('boot-msg');
   const iv = setInterval(() => {
     i++;
     if (i < BOOT_MSGS.length) { msgEl.textContent = BOOT_MSGS[i]; }
-    else {
-      clearInterval(iv);
-      const boot = document.getElementById('boot');
-      boot.style.opacity = '0';
-      setTimeout(() => {
-        boot.style.display = 'none';
-        if (state.currentUser) { initApp(); }
-        else { showLogin(); }
-      }, 600);
-    }
+    else { clearInterval(iv); }
   }, 400);
   startClock();
+
+  // Firebase Auth 状態監視 — ここがすべての起点
+  auth.onAuthStateChanged(async (user) => {
+    const boot = document.getElementById('boot');
+    if (user) {
+      currentFbUser = user;
+      await loadUserDoc();
+      boot.style.opacity = '0';
+      setTimeout(() => { boot.style.display = 'none'; initApp(); }, 600);
+    } else {
+      currentFbUser = null;
+      userDoc = {};
+      boot.style.opacity = '0';
+      setTimeout(() => { boot.style.display = 'none'; showLogin(); }, 600);
+    }
+  });
 });
 
 // ═══════════════════════════════════════════════════
@@ -996,6 +1051,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // ═══════════════════════════════════════════════════
 function showLogin() {
   document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('main-shell').style.display  = 'none';
 }
 
 function switchTab(tab) {
@@ -1004,55 +1060,92 @@ function switchTab(tab) {
   document.querySelectorAll('.login-tab').forEach((b,i) => b.classList.toggle('active', (i===0&&tab==='login')||(i===1&&tab==='register')));
 }
 
-function doLogin() {
+function setLoginErr(id, msg) { document.getElementById(id).textContent = msg; }
+
+// メール/パスワード ログイン
+async function doLogin() {
   const email = document.getElementById('li-email').value.trim();
   const pass  = document.getElementById('li-pass').value;
-  const errEl = document.getElementById('li-err');
-  const user  = state.users.find(u => u.email === email && u.pass === pass);
-  if (!user) { errEl.textContent = '✗ AGENT ID または ACCESS KEY が無効です'; return; }
-  errEl.textContent = '';
-  state.currentUser = email;
-  saveState();
-  document.getElementById('login-screen').style.display = 'none';
-  initApp();
+  setLoginErr('li-err', '');
+  if (!email || !pass) { setLoginErr('li-err','✗ メールとパスワードを入力してください'); return; }
+  try {
+    await auth.signInWithEmailAndPassword(email, pass);
+    // onAuthStateChanged が自動的にinitApp()を呼ぶ
+  } catch(e) {
+    setLoginErr('li-err', '✗ ' + fbErrMsg(e.code));
+  }
 }
 
-function doRegister() {
+// メール/パスワード 新規登録
+async function doRegister() {
   const name  = document.getElementById('rg-name').value.trim();
   const email = document.getElementById('rg-email').value.trim();
   const pass  = document.getElementById('rg-pass').value;
-  const errEl = document.getElementById('rg-err');
-  if (!name)            { errEl.textContent = '✗ AGENT NAME を入力してください'; return; }
-  if (!email || !email.includes('@')) { errEl.textContent = '✗ 有効なメールアドレスを入力してください'; return; }
-  if (pass.length < 8)  { errEl.textContent = '✗ パスワードは8文字以上必要です'; return; }
-  if (state.users.find(u => u.email === email)) { errEl.textContent = '✗ このメールアドレスは既に登録済みです'; return; }
-  errEl.textContent = '';
-  const now = new Date();
-  const reg = `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')}`;
-  state.users.push({ email, pass, name, reg, mode:'STANDARD' });
-  state.currentUser = email;
-  saveState();
-  document.getElementById('login-screen').style.display = 'none';
-  initApp();
+  setLoginErr('rg-err','');
+  if (!name)          { setLoginErr('rg-err','✗ AGENT NAME を入力してください'); return; }
+  if (!email)         { setLoginErr('rg-err','✗ メールアドレスを入力してください'); return; }
+  if (pass.length<8)  { setLoginErr('rg-err','✗ パスワードは8文字以上必要です'); return; }
+  try {
+    const cred = await auth.createUserWithEmailAndPassword(email, pass);
+    await cred.user.updateProfile({ displayName: name });
+    currentFbUser = cred.user;
+    // Firestoreにユーザードキュメントを作成
+    await loadUserDoc();
+    // nameを上書き保存
+    await saveUserDoc({ name, email });
+    // onAuthStateChanged が自動呼び出し
+  } catch(e) {
+    setLoginErr('rg-err','✗ ' + fbErrMsg(e.code));
+  }
 }
 
-function doLogout() {
-  state.currentUser = null;
-  saveState();
-  location.reload();
+// Twitter (X) ログイン
+async function doTwitterLogin() {
+  try {
+    await auth.signInWithPopup(twitterProvider);
+    // onAuthStateChanged → loadUserDoc → initApp の流れで処理
+  } catch(e) {
+    notify('✗ Twitterログインに失敗しました: ' + fbErrMsg(e.code), 'err');
+  }
+}
+
+// ログアウト
+async function doLogout() {
+  await auth.signOut();
+  // onAuthStateChanged → showLogin() が自動で呼ばれる
+}
+
+// Firebaseエラーコードを日本語に
+function fbErrMsg(code) {
+  const map = {
+    'auth/invalid-email':            'メールアドレスの形式が正しくありません',
+    'auth/user-disabled':            'このアカウントは無効化されています',
+    'auth/user-not-found':           'アカウントが見つかりません',
+    'auth/wrong-password':           'パスワードが間違っています',
+    'auth/invalid-credential':       'メールアドレスまたはパスワードが正しくありません',
+    'auth/email-already-in-use':     'このメールアドレスは既に使用されています',
+    'auth/weak-password':            'パスワードは8文字以上にしてください',
+    'auth/popup-closed-by-user':     'ログインがキャンセルされました',
+    'auth/cancelled-popup-request':  'ポップアップがキャンセルされました',
+    'auth/popup-blocked':            'ポップアップがブロックされました。許可してください',
+    'auth/account-exists-with-different-credential': '同じメールアドレスで別の方法で登録済みです',
+  };
+  return map[code] || code;
 }
 
 // ═══════════════════════════════════════════════════
 //  APP INIT
 // ═══════════════════════════════════════════════════
 function initApp() {
-  document.getElementById('main-shell').style.display = 'flex';
-  const user = getUser();
-  document.getElementById('sb-agent-name').textContent = user ? user.name : '---';
-  document.getElementById('pr-name').value  = user ? user.name  : '';
-  document.getElementById('pr-email').value = user ? user.email : '';
-  document.getElementById('pr-date').value  = user ? user.reg   : '';
-  document.getElementById('st-mode').textContent = user ? user.mode : 'STANDARD';
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('main-shell').style.display   = 'flex';
+  const name  = userDoc.name  || currentFbUser?.displayName || 'AGENT';
+  const email = userDoc.email || currentFbUser?.email || '';
+  document.getElementById('sb-agent-name').textContent = name;
+  document.getElementById('pr-name').value  = name;
+  document.getElementById('pr-email').value = email;
+  document.getElementById('pr-date').value  = userDoc.reg || '---';
+  document.getElementById('st-mode').textContent = userDoc.mode || 'STANDARD';
   renderDashboard();
   renderTransmissions();
   renderReportCaseSelect();
@@ -1065,8 +1158,7 @@ function initApp() {
   setTimeout(() => {
     document.querySelectorAll('.signal-fill').forEach(el => { el.style.width = el.dataset.w + '%'; });
   }, 300);
-  // badge
-  const unread = TRANSMISSIONS.filter(t => !state.readMails[t.id]).length;
+  const unread = TRANSMISSIONS.filter(t => !(userDoc.readMails||{})[t.id]).length;
   const mailBadge = document.getElementById('mail-badge');
   if (unread > 0) { mailBadge.textContent = unread; mailBadge.style.display = ''; }
   else { mailBadge.style.display = 'none'; }
@@ -1241,8 +1333,9 @@ function openCaseDetail(caseId) {
 // ═══════════════════════════════════════════════════
 function renderTransmissions() {
   const list = document.getElementById('trans-list');
+  const readMails = userDoc.readMails || {};
   list.innerHTML = TRANSMISSIONS.map(t => {
-    const read = state.readMails[t.id];
+    const read = readMails[t.id];
     return `<div class="transmission-item ${!read?'unread':''}" onclick="readMail('${t.id}')">
       <div class="trans-icon">✉</div>
       <div class="trans-body">
@@ -1255,9 +1348,9 @@ function renderTransmissions() {
   }).join('');
 }
 
-function readMail(id) {
-  state.readMails[id] = true;
-  saveState();
+async function readMail(id) {
+  const readMails = { ...(userDoc.readMails || {}), [id]: true };
+  await saveUserDoc({ readMails });
   const t = TRANSMISSIONS.find(x => x.id === id);
   if (!t) return;
   document.getElementById('modal-case-id').textContent = t.title;
@@ -1268,7 +1361,7 @@ function readMail(id) {
     <div class="modal-desc" style="white-space:pre-line;font-size:11px;color:var(--text);">${t.preview}</div>`;
   showModal('case-detail');
   renderTransmissions();
-  const unread = TRANSMISSIONS.filter(x => !state.readMails[x.id]).length;
+  const unread = TRANSMISSIONS.filter(x => !(userDoc.readMails||{})[x.id]).length;
   const badge = document.getElementById('mail-badge');
   if (unread > 0) { badge.textContent = unread; badge.style.display=''; }
   else { badge.style.display='none'; }
@@ -1277,13 +1370,11 @@ function readMail(id) {
 // ═══════════════════════════════════════════════════
 //  PROFILE
 // ═══════════════════════════════════════════════════
-function saveProfile() {
-  const user = getUser();
-  if (!user) return;
+async function saveProfile() {
   const name = document.getElementById('pr-name').value.trim();
   if (!name) { showSaveMsg('pr-save-msg','err','✗ エージェント名を入力してください'); return; }
-  user.name = name;
-  saveState();
+  await saveUserDoc({ name });
+  await currentFbUser.updateProfile({ displayName: name });
   document.getElementById('sb-agent-name').textContent = name;
   showSaveMsg('pr-save-msg','ok','✓ プロフィールを保存しました');
   renderProfileStats();
@@ -1297,8 +1388,9 @@ function renderProfileStats() {
     ['接続済みケース', conn.length + ' / ' + CASES.length],
     ['完了ケース',     comp.length],
     ['解錠コード数',   hist.length],
-    ['ゲームモード',   getUser()?.mode || 'STANDARD'],
-    ['登録日',         getUser()?.reg  || '---'],
+    ['ゲームモード',   userDoc.mode || 'STANDARD'],
+    ['登録日',         userDoc.reg  || '---'],
+    ['認証方式',       currentFbUser?.providerData?.[0]?.providerId === 'twitter.com' ? 'X (Twitter)' : 'メール/パスワード'],
   ].map(([l,v]) => `<div class="profile-stat"><div class="profile-stat-lbl">${l}</div><div class="profile-stat-val">${v}</div></div>`).join('');
 }
 
@@ -1317,42 +1409,46 @@ document.addEventListener('DOMContentLoaded', () => {
   si.addEventListener('keydown', e => { if(e.key==='Enter') validateSerial(); });
 });
 
-function validateSerial() {
+async function validateSerial() {
   const val = document.getElementById('serial-input').value.trim().toUpperCase();
   const resEl = document.getElementById('serial-result');
   if (!val) return;
-  const u = uid();
 
   if (!SERIAL_DB[val]) {
     resEl.className = 'serial-result err'; resEl.textContent = '✗ 無効なコードです。再確認してください。';
     addLog('err','ERR',`Serial rejected: <em>${val}</em>`); return;
   }
-  if (state.usedCodes[val]) {
+
+  // Firestoreでコードの使用チェック（グローバル）
+  const codeRef = db.collection('usedCodes').doc(val);
+  const codeSnap = await codeRef.get();
+  if (codeSnap.exists) {
     resEl.className = 'serial-result err'; resEl.textContent = '✗ このコードは既に使用済みです。';
     return;
   }
+
   const entry = SERIAL_DB[val];
-  if (!state.connected[u]) state.connected[u] = [];
-  if (!state.connected[u].includes(entry.caseId)) {
-    state.connected[u].push(entry.caseId);
-  }
-  state.usedCodes[val] = true;
-  if (!state.unlockHist[u]) state.unlockHist[u] = [];
+  const conn = [...getConnected()];
+  if (!conn.includes(entry.caseId)) conn.push(entry.caseId);
+
   const now = new Date();
   const dateStr = `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-  state.unlockHist[u].unshift({ code:val, label:entry.label, date:dateStr });
-  saveState();
+  const hist = [{ code:val, label:entry.label, date:dateStr }, ...getUnlockHist()];
+
+  // Firestoreに保存（コード使用記録＋ユーザーデータ更新を同時に）
+  const batch = db.batch();
+  batch.set(codeRef, { usedBy: uid(), date: dateStr });
+  batch.update(db.collection('users').doc(uid()), { connected: conn, unlockHist: hist });
+  await batch.commit();
+  userDoc.connected  = conn;
+  userDoc.unlockHist = hist;
 
   resEl.className = 'serial-result ok';
   resEl.textContent = `✓ ${entry.label} を解錠しました`;
   document.getElementById('serial-input').value = '';
   addLog('ok','OK', `Serial accepted: <em>${val}</em> → ${entry.label}`);
   notify(`${entry.label} を解錠しました`, 'ok');
-  renderDashboard();
-  renderAllCases();
-  renderUnlockHistory();
-  renderProfileStats();
-  renderReportCaseSelect();
+  renderDashboard(); renderAllCases(); renderUnlockHistory(); renderProfileStats(); renderReportCaseSelect();
 }
 
 function renderUnlockHistory() {
@@ -1380,38 +1476,35 @@ function renderReportCaseSelect() {
   }
 }
 
-function submitReport() {
+async function submitReport() {
   const caseId = document.getElementById('report-case-select').value;
-  const word = document.getElementById('report-lastword').value.trim();
-  const resEl = document.getElementById('report-result');
+  const word   = document.getElementById('report-lastword').value.trim();
+  const resEl  = document.getElementById('report-result');
   if (!caseId) { resEl.className='report-result err'; resEl.textContent='✗ ケースを選択してください'; return; }
   if (!word)   { resEl.className='report-result err'; resEl.textContent='✗ ラストワードを入力してください'; return; }
-  const u = uid();
-  const c = CASES.find(x => x.id === caseId);
-  // check answer
+  const c       = CASES.find(x => x.id === caseId);
   const answers = LASTWORD_DB[caseId];
   const correct = answers ? answers.some(a => a.toLowerCase() === word.toLowerCase()) : true;
-  if (!state.reportHist[u]) state.reportHist[u] = [];
-  if (!state.completed[u])  state.completed[u] = [];
-  const now = new Date();
+  const now     = new Date();
   const dateStr = `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+
+  const newReport = { caseId, word, date:dateStr, status: correct ? 'ACCEPTED' : 'REJECTED' };
+  const hist = [newReport, ...getReportHist()];
+
   if (correct) {
-    if (!state.completed[u].find(r => r.caseId === caseId)) {
-      state.completed[u].push({ caseId, word, date:dateStr });
-    }
-    state.reportHist[u].unshift({ caseId, word, date:dateStr, status:'ACCEPTED' });
-    saveState();
+    const comp = getCompleted();
+    if (!comp.find(r => r.caseId === caseId)) comp.push({ caseId, word, date:dateStr });
+    await saveUserDoc({ completed: comp, reportHist: hist });
     resEl.className='report-result ok'; resEl.textContent='✓ ラストワードを受理しました。ミッション完了。';
     addLog('ok','OK',`Report ACCEPTED: <em>${c?.title}</em> [${word}]`);
     notify(`${c?.title} MISSION COMPLETE`, 'ok');
     document.getElementById('report-lastword').value = '';
-    renderDashboard(); renderAllCases(); renderReportHistory(); renderProfileStats(); renderReportCaseSelect();
+    renderDashboard(); renderAllCases(); renderProfileStats(); renderReportCaseSelect();
   } else {
-    state.reportHist[u].unshift({ caseId, word, date:dateStr, status:'REJECTED' });
-    saveState();
+    await saveUserDoc({ reportHist: hist });
     resEl.className='report-result err'; resEl.textContent='✗ ラストワードが一致しません。再調査してください。';
-    renderReportHistory();
   }
+  renderReportHistory();
 }
 
 function renderReportHistory() {
@@ -1429,68 +1522,56 @@ function renderReportHistory() {
 // ═══════════════════════════════════════════════════
 //  SETTINGS
 // ═══════════════════════════════════════════════════
-function setMode(mode) {
-  const user = getUser();
-  if (!user) return;
-  user.mode = mode;
-  saveState();
+async function setMode(mode) {
+  await saveUserDoc({ mode });
   document.getElementById('st-mode').textContent = mode;
   updateModeButtons();
   notify(`ゲームモードを ${mode} に変更しました`, 'info');
 }
 
 function updateModeButtons() {
-  const mode = getUser()?.mode || 'STANDARD';
+  const mode = userDoc.mode || 'STANDARD';
   ['SOLO','STANDARD','HARD'].forEach(m => {
     const el = document.getElementById('mode-'+m.toLowerCase());
     if (el) el.classList.toggle('selected', mode === m);
   });
 }
 
-function changeEmail() {
+async function changeEmail() {
   const email = document.getElementById('m-email').value.trim();
   const pass  = document.getElementById('m-email-pass').value;
-  const user  = getUser();
-  if (!user) return;
-  if (user.pass !== pass) { notify('現在のパスワードが違います', 'err'); return; }
-  if (!email || !email.includes('@')) { notify('有効なメールアドレスを入力してください', 'err'); return; }
-  if (state.users.find(u => u.email === email && u.email !== user.email)) { notify('このメールアドレスは既に使用されています', 'err'); return; }
-  const oldEmail = user.email;
-  user.email = email;
-  state.currentUser = email;
-  // move data
-  ['connected','completed','unlockHist','reportHist'].forEach(k => {
-    if (state[k][oldEmail]) { state[k][email] = state[k][oldEmail]; delete state[k][oldEmail]; }
-  });
-  saveState();
-  document.getElementById('pr-email').value = email;
-  closeModal();
-  notify('メールアドレスを変更しました', 'ok');
+  if (!email) { notify('メールアドレスを入力してください', 'err'); return; }
+  try {
+    // 再認証してからメール変更
+    const cred = firebase.auth.EmailAuthProvider.credential(currentFbUser.email, pass);
+    await currentFbUser.reauthenticateWithCredential(cred);
+    await currentFbUser.updateEmail(email);
+    await saveUserDoc({ email });
+    document.getElementById('pr-email').value = email;
+    closeModal();
+    notify('メールアドレスを変更しました', 'ok');
+  } catch(e) {
+    notify('✗ ' + fbErrMsg(e.code), 'err');
+  }
 }
 
-function changePassword() {
+async function changePassword() {
   const oldP = document.getElementById('m-old-pass').value;
   const newP = document.getElementById('m-new-pass').value;
-  const user = getUser();
-  if (!user) return;
-  if (user.pass !== oldP) { notify('現在のパスワードが違います', 'err'); return; }
-  if (newP.length < 8)    { notify('新しいパスワードは8文字以上必要です', 'err'); return; }
-  user.pass = newP;
-  saveState();
-  closeModal();
-  notify('パスワードを変更しました', 'ok');
+  if (newP.length < 8) { notify('新しいパスワードは8文字以上必要です', 'err'); return; }
+  try {
+    const cred = firebase.auth.EmailAuthProvider.credential(currentFbUser.email, oldP);
+    await currentFbUser.reauthenticateWithCredential(cred);
+    await currentFbUser.updatePassword(newP);
+    closeModal();
+    notify('パスワードを変更しました', 'ok');
+  } catch(e) {
+    notify('✗ ' + fbErrMsg(e.code), 'err');
+  }
 }
 
-function resetAllData() {
-  const u = uid();
-  if (u) {
-    delete state.connected[u];
-    delete state.completed[u];
-    delete state.unlockHist[u];
-    delete state.reportHist[u];
-  }
-  state.usedCodes = {};
-  saveState();
+async function resetAllData() {
+  await saveUserDoc({ connected:[], completed:[], unlockHist:[], reportHist:[] });
   closeModal();
   notify('全データをリセットしました', 'info');
   renderDashboard(); renderAllCases(); renderUnlockHistory(); renderReportHistory(); renderProfileStats(); renderReportCaseSelect();
@@ -1607,10 +1688,4 @@ function addLog(cls, level, msg) {
   const ts = `${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}:${String(n.getSeconds()).padStart(2,'0')}`;
   const line = document.createElement('div');
   line.className = 'log-line';
-  line.innerHTML = `<span class="log-time">${ts}</span><span class="log-lv ${cls}">[${level}]</span><span class="log-msg">${msg}</span>`;
-  body.prepend(line);
-  while (body.children.length > 25) body.removeChild(body.lastChild);
-}
-</script>
-</body>
-</html>
+  line.innerHTML = `<span class
