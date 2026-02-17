@@ -1029,8 +1029,24 @@ document.addEventListener('DOMContentLoaded', () => {
   }, 400);
   startClock();
 
-  // Firebase Auth 状態監視 — ここがすべての起点
+    // Firebase Auth 状態監視 — ここがすべての起点
+  let authResolved = false;
+
+  // タイムアウト保険：5秒以内にFirebaseが応答しなければログイン画面へ強制遷移
+  const authTimeout = setTimeout(() => {
+    if (!authResolved) {
+      authResolved = true;
+      const boot = document.getElementById('boot');
+      boot.style.opacity = '0';
+      setTimeout(() => { boot.style.display = 'none'; showLogin(); }, 600);
+    }
+  }, 5000);
+
   auth.onAuthStateChanged(async (user) => {
+    if (authResolved) return; // すでにタイムアウトで処理済みの場合は無視
+    authResolved = true;
+    clearTimeout(authTimeout);
+
     const boot = document.getElementById('boot');
     if (user) {
       currentFbUser = user;
@@ -1044,8 +1060,6 @@ document.addEventListener('DOMContentLoaded', () => {
       setTimeout(() => { boot.style.display = 'none'; showLogin(); }, 600);
     }
   });
-});
-
 // ═══════════════════════════════════════════════════
 //  AUTH
 // ═══════════════════════════════════════════════════
