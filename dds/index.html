@@ -1029,25 +1029,24 @@ document.addEventListener('DOMContentLoaded', () => {
   }, 400);
   startClock();
 
-    // Firebase Auth 状態監視 — ここがすべての起点
+     // タイムアウト保険：6秒待っても反応なければ強制でログイン画面へ
   let authResolved = false;
+  const boot = document.getElementById('boot');
 
-  // タイムアウト保険：5秒以内にFirebaseが応答しなければログイン画面へ強制遷移
-  const authTimeout = setTimeout(() => {
+  const forceShow = setTimeout(() => {
     if (!authResolved) {
       authResolved = true;
-      const boot = document.getElementById('boot');
       boot.style.opacity = '0';
       setTimeout(() => { boot.style.display = 'none'; showLogin(); }, 600);
     }
-  }, 5000);
+  }, 6000);
 
+  // Firebase Auth 状態監視
   auth.onAuthStateChanged(async (user) => {
-    if (authResolved) return; // すでにタイムアウトで処理済みの場合は無視
+    if (authResolved) return;
     authResolved = true;
-    clearTimeout(authTimeout);
+    clearTimeout(forceShow);
 
-    const boot = document.getElementById('boot');
     if (user) {
       currentFbUser = user;
       await loadUserDoc();
@@ -1060,6 +1059,7 @@ document.addEventListener('DOMContentLoaded', () => {
       setTimeout(() => { boot.style.display = 'none'; showLogin(); }, 600);
     }
   });
+});
 // ═══════════════════════════════════════════════════
 //  AUTH
 // ═══════════════════════════════════════════════════
