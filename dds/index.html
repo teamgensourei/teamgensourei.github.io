@@ -1021,30 +1021,38 @@ const BOOT_MSGS = [
 
 document.addEventListener('DOMContentLoaded', () => {
   let i = 0;
-  let bootComplete = false;
-  let authResolved = false;
-  let pendingUser = null;
+  let bootAnimationDone = false;
+  let authCheckDone = false;
   const msgEl = document.getElementById('boot-msg');
   const boot = document.getElementById('boot');
   
+  // BOOT アニメーション（2秒で完了）
   const iv = setInterval(() => {
     i++;
     if (i < BOOT_MSGS.length) { 
       msgEl.textContent = BOOT_MSGS[i]; 
     } else { 
-      clearInterval(iv); 
-      bootComplete = true;
-      // BOOT完了後、待機中の認証処理を実行
-      if (pendingUser !== null) {
-        transitionAfterBoot(pendingUser);
-      }
+      clearInterval(iv);
+      bootAnimationDone = true;
+      // アニメーション完了後、認証チェックも完了していれば画面遷移
+      if (authCheckDone) proceedAfterBoot();
     }
   }, 400);
   startClock();
 
-  async function transitionAfterBoot(user) {
-    if (authResolved) return;
-    authResolved = true;
+  let currentAuthUser = null;
+
+  function proceedAfterBoot() {
+    boot.style.opacity = '0';
+    setTimeout(() => { 
+      boot.style.display = 'none'; 
+      currentAuthUser ? initApp() : showLogin();
+    }, 600);
+  }
+
+  // Firebase認証状態監視（即座に開始）
+  auth.onAuthStateChanged(async (user) => {
+    currentAuthUser = user;
     
     if (user) {
       currentFbUser = user;
@@ -1054,24 +1062,12 @@ document.addEventListener('DOMContentLoaded', () => {
       userDoc = {};
     }
     
-    boot.style.opacity = '0';
-    setTimeout(() => { 
-      boot.style.display = 'none'; 
-      user ? initApp() : showLogin();
-    }, 600);
-  }
-
-  // Firebase Auth 状態監視
-  auth.onAuthStateChanged(async (user) => {
-    if (authResolved) return;
+    authCheckDone = true;
     
-    // BOOTアニメーション完了を待つ
-    if (!bootComplete) {
-      pendingUser = user;
-      return;
+    // BOOTアニメーション完了していれば画面遷移
+    if (bootAnimationDone) {
+      proceedAfterBoot();
     }
-    
-    transitionAfterBoot(user);
   });
 });
 
