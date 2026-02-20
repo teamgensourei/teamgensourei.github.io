@@ -1020,12 +1020,6 @@ const BOOT_MSGS = [
 ];
 
 document.addEventListener('DOMContentLoaded', () => {
-  // ★デバッグ用エラー表示
-  window.onerror = (msg, src, line) => {
-    document.getElementById('boot-msg').textContent = 'ERR: ' + msg + ' (L' + line + ')';
-    document.getElementById('boot-msg').style.color = '#ff2d55';
-  };
-  
   let i = 0;
   const msgEl = document.getElementById('boot-msg');
   const iv = setInterval(() => {
@@ -1035,24 +1029,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }, 400);
   startClock();
 
-     // タイムアウト保険：6秒待っても反応なければ強制でログイン画面へ
-  let authResolved = false;
-  const boot = document.getElementById('boot');
-
-  const forceShow = setTimeout(() => {
-    if (!authResolved) {
-      authResolved = true;
-      boot.style.opacity = '0';
-      setTimeout(() => { boot.style.display = 'none'; showLogin(); }, 600);
-    }
-  }, 6000);
-
-  // Firebase Auth 状態監視
+  // Firebase Auth 状態監視 — ここがすべての起点
   auth.onAuthStateChanged(async (user) => {
-    if (authResolved) return;
-    authResolved = true;
-    clearTimeout(forceShow);
-
+    const boot = document.getElementById('boot');
     if (user) {
       currentFbUser = user;
       await loadUserDoc();
@@ -1066,6 +1045,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+
 // ═══════════════════════════════════════════════════
 //  AUTH
 // ═══════════════════════════════════════════════════
@@ -1175,7 +1155,6 @@ function initApp() {
   renderReportHistory();
   updateModeButtons();
   startLogFeed();
-  initSerialInput();
   setTimeout(() => {
     document.querySelectorAll('.signal-fill').forEach(el => { el.style.width = el.dataset.w + '%'; });
   }, 300);
@@ -1418,9 +1397,8 @@ function renderProfileStats() {
 // ═══════════════════════════════════════════════════
 //  SERIAL CODE
 // ═══════════════════════════════════════════════════
-function initSerialInput() {
+document.addEventListener('DOMContentLoaded', () => {
   const si = document.getElementById('serial-input');
-  if (!si) return;
   si.addEventListener('input', e => {
     let v = e.target.value.replace(/[^a-zA-Z0-9]/g,'').toUpperCase();
     if (v.length > 4)  v = v.slice(0,4) + '-' + v.slice(4);
@@ -1429,7 +1407,7 @@ function initSerialInput() {
     e.target.value = v;
   });
   si.addEventListener('keydown', e => { if(e.key==='Enter') validateSerial(); });
-}
+});
 
 async function validateSerial() {
   const val = document.getElementById('serial-input').value.trim().toUpperCase();
@@ -1710,4 +1688,10 @@ function addLog(cls, level, msg) {
   const ts = `${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}:${String(n.getSeconds()).padStart(2,'0')}`;
   const line = document.createElement('div');
   line.className = 'log-line';
-  line.innerHTML = `<span class
+  line.innerHTML = `<span class="log-time">${ts}</span><span class="log-lv ${cls}">[${level}]</span><span class="log-msg">${msg}</span>`;
+  body.prepend(line);
+  while (body.children.length > 25) body.removeChild(body.lastChild);
+}
+</script>
+</body>
+</html>
