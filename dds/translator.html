@@ -119,15 +119,15 @@ button:hover {
     "-ir":  { "ja": "している" },
     "-an":  { "ja": "した" },
     "-el":  { "ja": "だろう" },
-    "-eth": { "ja": "される" }
-  }
+    "-eth": { "ja": "される" },
+    "-si": { "ja": "たち" }
+  },
   "pluralform": {
-   "-si": { "ja": "たち" },
-   "sel": { "ja": "複数の" },
-  }
+    "sel": { "ja": "複数の" }
+  },
   "greeting": {
    "hile": { "ja": "こんにちは" },
-   "bile": { "ja": "さようなら" },
+   "bile": { "ja": "さようなら" }
   }
 }
 </script>
@@ -170,12 +170,16 @@ function arcaToJapanese(text) {
     }
 
     if (DICT.words[base]) {
-      out.push(DICT.words[base].ja + (DICT.grammar[suf]?.ja || ""));
-    } else if (DICT.particles[base]) {
-      out.push(DICT.particles[base].ja);
-    } else {
-      out.push(base);
-    }
+  out.push(DICT.words[base].ja + (DICT.grammar[suf]?.ja || ""));
+} else if (DICT.pluralform?.[base]) {
+  out.push(DICT.pluralform[base].ja);
+} else if (DICT.greeting?.[base]) {
+  out.push(DICT.greeting[base].ja);
+} else if (DICT.particles[base]) {
+  out.push(DICT.particles[base].ja);
+} else {
+  out.push(base);
+}
   });
 
   return out.join("");
@@ -191,6 +195,14 @@ function japaneseToArca(text) {
   Object.entries(DICT.words).forEach(([a, d]) => {
     out = out.replaceAll(d.ja, a);
   });
+
+  Object.entries(DICT.pluralform || {}).forEach(([a, d]) => {
+  out = out.replaceAll(d.ja, a);
+});
+
+Object.entries(DICT.greeting || {}).forEach(([a, d]) => {
+  out = out.replaceAll(d.ja, a);
+});
 
   Object.entries(DICT.particles).forEach(([a, d]) => {
     out = out.replaceAll(d.ja, " " + a);
